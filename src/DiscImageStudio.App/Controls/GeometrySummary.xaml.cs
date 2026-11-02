@@ -13,7 +13,7 @@ public partial class GeometrySummary : UserControl
 {
     public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
         nameof(Title), typeof(string), typeof(GeometrySummary),
-        new PropertyMetadata("盘片几何", static (sender, _) => ((GeometrySummary)sender).UpdateVisuals()));
+        new PropertyMetadata("Disc Geometry", static (sender, _) => ((GeometrySummary)sender).UpdateVisuals()));
 
     public static readonly DependencyProperty DetailsProperty = DependencyProperty.Register(
         nameof(Details), typeof(string), typeof(GeometrySummary),
@@ -34,7 +34,7 @@ public partial class GeometrySummary : UserControl
 
     public static readonly DependencyProperty EditLabelProperty = DependencyProperty.Register(
         nameof(EditLabel), typeof(string), typeof(GeometrySummary),
-        new PropertyMetadata("编辑…", static (sender, args) => ((GeometrySummary)sender).EditButton.Content = args.NewValue));
+        new PropertyMetadata("Edit…", static (sender, args) => ((GeometrySummary)sender).EditButton.Content = args.NewValue));
 
     public GeometrySummary()
     {

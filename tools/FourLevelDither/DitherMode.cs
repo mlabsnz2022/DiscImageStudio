@@ -16,14 +16,14 @@ internal static class DitherModes
         _ => throw new ArgumentOutOfRangeException(nameof(mode)),
     };
 
-    internal static string Label(DitherMode mode) => mode == DitherMode.Dvd ? "DVD 二阶" : "CD 二阶";
-    internal static string Suffix(DitherMode mode) => "黑白抖动";
+    internal static string Label(DitherMode mode) => mode == DitherMode.Dvd ? "DVD Binary" : "CD Binary";
+    internal static string Suffix(DitherMode mode) => "BW-Dither";
     internal static string PaletteLabel(DitherMode mode) => "0 / 255";
 
     internal static DitherMode Parse(string value) => value.ToLowerInvariant() switch
     {
         "dvd" => DitherMode.Dvd,
         "cd" => DitherMode.Cd,
-        _ => throw new ArgumentException("--mode 请选择 dvd 或 cd，均输出黑白二阶。"),
+        _ => throw new ArgumentException("--mode must be dvd or cd; both output binary black/white."),
     };
 }

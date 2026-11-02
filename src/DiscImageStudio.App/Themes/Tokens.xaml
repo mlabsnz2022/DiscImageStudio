@@ -127,7 +127,7 @@
     <sys:Double x:Key="SidebarCollapsedWidth">60</sys:Double>
     <!-- Standard width for the context/inspector columns flanking a workspace stage; a
          GridLength so column definitions can take it directly. -->
-    <GridLength x:Key="SidePanelWidth">256</GridLength>
+    <GridLength x:Key="SidePanelWidth">280</GridLength>
     <Thickness x:Key="PagePadding">32,20,32,32</Thickness>
     <!-- Corner radius of floating surfaces (toasts, flyouts): between chip and card. -->
     <CornerRadius x:Key="RadiusFloating">10</CornerRadius>

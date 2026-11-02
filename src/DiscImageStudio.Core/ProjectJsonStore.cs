@@ -116,7 +116,7 @@ public static class ProjectJsonStore
     public const int CurrentSchemaVersion = 2;
     private const int LegacySchemaVersion = 1;
     public const string FileExtension = ".discproj";
-    public const string FileFilter = "Disc Image Studio 工程|*.discproj";
+    public const string FileFilter = "Disc Image Studio Project|*.discproj";
 
     // 256px PNG of a photographic design stays under ~200K base64 chars; the cap keeps a
     // pathological file from bloating the project JSON.
@@ -155,7 +155,7 @@ public static class ProjectJsonStore
         string? directory = Path.GetDirectoryName(fullPath);
         if (string.IsNullOrEmpty(directory))
         {
-            throw new ArgumentException("工程路径必须包含目录。", nameof(path));
+            throw new ArgumentException("Project path must include a directory.", nameof(path));
         }
 
         Directory.CreateDirectory(directory);
@@ -196,40 +196,40 @@ public static class ProjectJsonStore
         if (document.SchemaVersion is not (LegacySchemaVersion or CurrentSchemaVersion))
         {
             throw new InvalidDataException(
-                $"不支持 schemaVersion={document.SchemaVersion}；当前支持 {LegacySchemaVersion} 与 {CurrentSchemaVersion}。");
+                $"Unsupported schemaVersion={document.SchemaVersion}; currently supported {LegacySchemaVersion} and {CurrentSchemaVersion}.");
         }
 
         if (document.SchemaVersion == LegacySchemaVersion
             && (document.IsBluRay || document.BluRay is not null))
         {
-            throw new InvalidDataException("schemaVersion 1 只包含 CD/DVD 工程，不能声明蓝光字段。");
+            throw new InvalidDataException("schemaVersion 1 only supports CD/DVD projects and cannot declare Blu-ray fields.");
         }
 
         if (!document.IsBluRay && document.BluRay is not null)
         {
-            throw new InvalidDataException("bluRay 设置只用于蓝光工程。");
+            throw new InvalidDataException("bluRay settings are only used for Blu-ray projects.");
         }
 
         if (string.IsNullOrWhiteSpace(document.Name))
         {
-            throw new InvalidDataException("工程名不能为空。");
+            throw new InvalidDataException("Project name cannot be empty.");
         }
 
         if (!IsKnownFamily(document.DiscFamily))
         {
             throw new InvalidDataException(
-                $"discFamily '{document.DiscFamily}' 无效；仅支持 '{ProjectDocument.CdFamily}'、"
-                + $"'{ProjectDocument.DvdFamily}' 与 '{ProjectDocument.BluRayFamily}'。");
+                $"Invalid discFamily '{document.DiscFamily}'; only '{ProjectDocument.CdFamily}', "
+                + $"'{ProjectDocument.DvdFamily}', and '{ProjectDocument.BluRayFamily}' are supported.");
         }
 
         if (document.Geometry is null)
         {
-            throw new InvalidDataException("geometry 不能为空。");
+            throw new InvalidDataException("geometry cannot be empty.");
         }
 
         if (document.Outputs is null)
         {
-            throw new InvalidDataException("outputs 不能为空。");
+            throw new InvalidDataException("outputs cannot be empty.");
         }
 
         ValidateExtensionData(document);
@@ -271,7 +271,7 @@ public static class ProjectJsonStore
             key => !string.Equals(key, ProjectDocument.LegacyImageProcessingKey, StringComparison.Ordinal));
         if (unknown is not null)
         {
-            throw new InvalidDataException($"无法识别的工程字段 '{unknown}'。");
+            throw new InvalidDataException($"Unrecognized project field '{unknown}'.");
         }
     }
 
@@ -287,40 +287,40 @@ public static class ProjectJsonStore
         ValidatePositiveFinite(geometry.OuterRadiusMm, "outerRadiusMm");
         if (geometry.OuterRadiusMm <= geometry.InnerRadiusMm)
         {
-            throw new InvalidDataException("outerRadiusMm 必须大于 innerRadiusMm。");
+            throw new InvalidDataException("outerRadiusMm must be greater than innerRadiusMm.");
         }
 
         if (geometry.Sectors <= 0)
         {
-            throw new InvalidDataException("sectors 必须大于 0。");
+            throw new InvalidDataException("sectors must be greater than 0.");
         }
 
         if (document.IsDvd && geometry.Sectors % 16 != 0)
         {
-            throw new InvalidDataException("DVD 的 sectors 必须是 16 的倍数。");
+            throw new InvalidDataException("DVD sectors must be a multiple of 16.");
         }
 
         if (document.IsBluRay)
         {
             if (geometry.Sectors % ProjectDocument.BluRaySectorsPerCluster != 0)
             {
-                throw new InvalidDataException("蓝光的 sectors 必须是 32 的倍数。");
+                throw new InvalidDataException("Blu-ray sectors must be a multiple of 32.");
             }
 
             if (geometry.Sectors > ProjectDocument.BluRaySectorsPerLayer)
             {
                 throw new InvalidDataException(
-                    $"蓝光 sectors 不能超过单层容量 {ProjectDocument.BluRaySectorsPerLayer:N0}。");
+                    $"Blu-ray sectors cannot exceed single-layer capacity {ProjectDocument.BluRaySectorsPerLayer:N0}.");
             }
 
             if (geometry.OuterRadiusMm > 60)
             {
-                throw new InvalidDataException("蓝光外半径不能超过 60 mm。");
+                throw new InvalidDataException("Blu-ray outer radius cannot exceed 60 mm.");
             }
 
             if (geometry.PitchLinear != 0 || geometry.PitchQuadratic != 0 || geometry.PitchCubic != 0)
             {
-                throw new InvalidDataException("蓝光使用恒定轨距，pitch 系数必须为 0。");
+                throw new InvalidDataException("Blu-ray uses constant track pitch; pitch coefficients must be 0.");
             }
         }
 
@@ -333,7 +333,7 @@ public static class ProjectJsonStore
         }
         catch (ArgumentException exception)
         {
-            throw new InvalidDataException($"轨距系数无效：{exception.Message}", exception);
+            throw new InvalidDataException($"Invalid track pitch coefficients: {exception.Message}", exception);
         }
     }
 
@@ -341,7 +341,7 @@ public static class ProjectJsonStore
     {
         if (document.Layers is null)
         {
-            throw new InvalidDataException("layers 不能为空。");
+            throw new InvalidDataException("layers cannot be empty.");
         }
 
         HashSet<string> uniqueIds = new(StringComparer.Ordinal);
@@ -349,30 +349,30 @@ public static class ProjectJsonStore
         {
             if (layer is null)
             {
-                throw new InvalidDataException("图层不能是 null。");
+                throw new InvalidDataException("Layer cannot be null.");
             }
 
             if (string.IsNullOrWhiteSpace(layer.Id) || !uniqueIds.Add(layer.Id))
             {
-                throw new InvalidDataException($"图层 id '{layer.Id}' 为空或重复。");
+                throw new InvalidDataException($"Layer id '{layer.Id}' is empty or duplicate.");
             }
 
             if (string.IsNullOrWhiteSpace(layer.Name))
             {
-                throw new InvalidDataException($"图层 '{layer.Id}' 的 name 不能为空。");
+                throw new InvalidDataException($"Layer '{layer.Id}' name cannot be empty.");
             }
 
             if (string.IsNullOrWhiteSpace(layer.ImagePath))
             {
-                throw new InvalidDataException($"图层 '{layer.Id}' 的 imagePath 不能为空。");
+                throw new InvalidDataException($"Layer '{layer.Id}' imagePath cannot be empty.");
             }
 
-            ValidateFinite(layer.TranslateXMm, $"图层 '{layer.Id}' 的 translateXMm");
-            ValidateFinite(layer.TranslateYMm, $"图层 '{layer.Id}' 的 translateYMm");
-            ValidateFinite(layer.RotationDeg, $"图层 '{layer.Id}' 的 rotationDeg");
+            ValidateFinite(layer.TranslateXMm, $"Layer '{layer.Id}' translateXMm");
+            ValidateFinite(layer.TranslateYMm, $"Layer '{layer.Id}' translateYMm");
+            ValidateFinite(layer.RotationDeg, $"Layer '{layer.Id}' rotationDeg");
             if (!double.IsFinite(layer.Scale) || layer.Scale <= 0)
             {
-                throw new InvalidDataException($"图层 '{layer.Id}' 的 scale 必须是大于 0 的有限数值。");
+                throw new InvalidDataException($"Layer '{layer.Id}' scale must be a finite number greater than 0.");
             }
         }
     }
@@ -382,7 +382,7 @@ public static class ProjectJsonStore
         ProjectOutputs outputs = document.Outputs;
         if (string.IsNullOrWhiteSpace(outputs.OutputPath))
         {
-            throw new InvalidDataException("outputs.outputPath 不能为空。");
+            throw new InvalidDataException("outputs.outputPath cannot be empty.");
         }
     }
 
@@ -395,7 +395,7 @@ public static class ProjectJsonStore
 
         if (thumbnailBase64.Length == 0 || thumbnailBase64.Length > MaxThumbnailBase64Chars)
         {
-            throw new InvalidDataException("thumbnailPngBase64 长度超出允许范围。");
+            throw new InvalidDataException("thumbnailPngBase64 length exceeds allowed limit.");
         }
 
         try
@@ -404,7 +404,7 @@ public static class ProjectJsonStore
         }
         catch (FormatException exception)
         {
-            throw new InvalidDataException("thumbnailPngBase64 不是有效的 Base64。", exception);
+            throw new InvalidDataException("thumbnailPngBase64 is not valid Base64.", exception);
         }
     }
 
@@ -415,7 +415,7 @@ public static class ProjectJsonStore
             ProjectDocument? document = JsonSerializer.Deserialize<ProjectDocument>(stream, JsonOptions);
             if (document is null)
             {
-                throw new InvalidDataException($"{sourceName} 不能为空。");
+                throw new InvalidDataException($"{sourceName} cannot be empty.");
             }
 
             Validate(document);
@@ -427,7 +427,7 @@ public static class ProjectJsonStore
         catch (JsonException exception)
         {
             throw new InvalidDataException(
-                $"{sourceName} 格式有误（第 {exception.LineNumber + 1} 行，第 {exception.BytePositionInLine + 1} 列）：{exception.Message}",
+                $"{sourceName} format error (line {exception.LineNumber + 1} , column {exception.BytePositionInLine + 1} ): {exception.Message}",
                 exception);
         }
     }
@@ -436,7 +436,7 @@ public static class ProjectJsonStore
     {
         if (!double.IsFinite(value) || value <= 0)
         {
-            throw new InvalidDataException($"{fieldName} 必须是大于 0 的有限数值。");
+            throw new InvalidDataException($"{fieldName} must be a finite number greater than 0.");
         }
     }
 
@@ -444,7 +444,7 @@ public static class ProjectJsonStore
     {
         if (!double.IsFinite(value))
         {
-            throw new InvalidDataException($"{fieldName} 必须是有限数值。");
+            throw new InvalidDataException($"{fieldName} must be a finite number.");
         }
     }
 }

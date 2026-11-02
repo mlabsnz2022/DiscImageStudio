@@ -429,7 +429,7 @@ public class DiscDesignCanvas : FrameworkElement
     private void DrawEmptyHint(DrawingContext context, Point center)
     {
         FormattedText text = DiscRenderCore.CreateText(
-            "点击左侧「导入图片」开始设计",
+            "Click \"Import Image\" on the left to begin designing",
             14,
             DiscTheme.Guide,
             VisualTreeHelper.GetDpi(this).PixelsPerDip);

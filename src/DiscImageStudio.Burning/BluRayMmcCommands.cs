@@ -39,12 +39,12 @@ internal sealed class MmcCommandException : IOException
     private static string Describe(byte opcode, MmcCommandResult result)
     {
         var (key, asc, ascq) = ReadSense(result.Sense);
-        string sense = key >= 0 ? $"Sense {key:X2}/{asc:X2}/{ascq:X2}" : "未返回有效的设备 Sense 数据";
+        string sense = key >= 0 ? $"Sense {key:X2}/{asc:X2}/{ascq:X2}" : "Device returned no valid Sense data";
         // HRESULT_FROM_WIN32(ERROR_DEVICE_NOT_CONNECTED). This describes the
         // current I/O connection; it does not establish a cable/power cause.
         string connection = result.HResult == unchecked((int)0x8007048f)
-            ? "，Windows 报告设备未连接" : string.Empty;
-        return $"蓝光命令 0x{opcode:X2} 失败（HRESULT 0x{result.HResult:X8}，"
+            ? ", Windows reported device disconnected" : string.Empty;
+        return $"Blu-ray command 0x{opcode:X2} failed (HRESULT 0x{result.HResult:X8}, "
             + sense + connection + "）。";
     }
 
@@ -71,7 +71,7 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
         byte[] configuration = Read(0x46, 8);
         RequireLength(configuration, 8, "GET CONFIGURATION");
         if (BinaryPrimitives.ReadUInt32BigEndian(configuration.AsSpan(0, 4)) < 4)
-            throw new IOException("GET CONFIGURATION 返回了无效的长度字段。");
+            throw new IOException("GET CONFIGURATION returned invalid length field.");
         int profile = BinaryPrimitives.ReadUInt16BigEndian(configuration.AsSpan(6, 2));
 
         byte[] disc = Read(0x51, 64);
@@ -79,12 +79,12 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
         bool discBlank = (disc[2] & 3) == 0;
         int lastTrack = disc[6] | disc[11] << 8;
         if (lastTrack == 0)
-            throw new IOException("蓝光盘未报告有效的可写轨道编号。");
+            throw new IOException("Blu-ray disc reported no valid recordable track number.");
 
         byte[] capacities = Read(0x23, 256);
         RequireLength(capacities, 12, "READ FORMAT CAPACITIES");
         if (capacities[3] < 8 || capacities[3] % 8 != 0 || capacities.Length < 4 + capacities[3])
-            throw new IOException("蓝光格式容量描述符长度无效。");
+            throw new IOException("Blu-ray format capacity descriptor length invalid.");
         uint maximumBlocks = BinaryPrimitives.ReadUInt32BigEndian(capacities.AsSpan(4, 4));
         int formatStatus = capacities[8] & 3;
         // For BD-R, bytes 9..11 describe spare-area clusters, not the logical
@@ -158,9 +158,9 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
         byte[] track = Execute(cdb, 48, 30).Data;
         RequireResponseLength(track, 36, "READ TRACK INFORMATION");
         if ((track[2] | track[32] << 8) != trackNumber)
-            throw new IOException("蓝光盘返回了不同的轨道编号，已停止刻录操作。");
+            throw new IOException("Blu-ray disc returned a different track number; burn stopped.");
         if ((track[5] & 0x20) != 0)
-            throw new IOException("蓝光轨道已标记为损坏，已停止刻录操作。");
+            throw new IOException("Blu-ray track is marked damaged; burn stopped.");
         return track;
     }
 
@@ -187,9 +187,9 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
             int status = ReadDiscStatus();
             if (status == 2) return true;
             if (status != 1)
-                throw new IOException("蓝光封盘后未返回有效的已完成盘片状态。");
+                throw new IOException("Blu-ray close disc did not return complete disc status.");
             return false;
-        }, "等待蓝光盘确认封盘完成超时。");
+        }, "Timed out waiting for Blu-ray close disc confirmation.");
     }
 
     private void WaitUntilTrackClosed(int trackNumber)
@@ -199,9 +199,9 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
             int status = ReadDiscStatus();
             if (status == 2) return true;
             if (status != 1)
-                throw new IOException("蓝光闭轨后未返回有效的已写入盘片状态。");
+                throw new IOException("Blu-ray close track did not return valid written disc status.");
             return IsTrackClosed(ReadTrack(trackNumber));
-        }, "等待蓝光盘确认闭轨完成超时。");
+        }, "Timed out waiting for Blu-ray close track confirmation.");
     }
 
     private void WaitUntilCompleted(Func<bool> isComplete, string timeoutMessage)
@@ -246,7 +246,7 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
             catch (MmcCommandException exception) when (exception.IsOperationInProgress)
             {
                 if (elapsed.Elapsed >= limit)
-                    throw new TimeoutException("等待蓝光盘完成写入收尾超时。", exception);
+                    throw new TimeoutException("Timed out waiting for Blu-ray disc finalize.", exception);
                 Thread.Sleep((int)Math.Min(200, Math.Max(1, (limit - elapsed.Elapsed).TotalMilliseconds)));
             }
         }
@@ -276,7 +276,7 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
     private static void RequireLength(byte[] bytes, int minimum, string command)
     {
         if (bytes.Length < minimum)
-            throw new IOException($"{command} 返回的数据被截断（{bytes.Length} 字节）。");
+            throw new IOException($"{command} returned data was truncated ({bytes.Length} bytes).");
     }
 
     private static void RequireResponseLength(byte[] bytes, int minimum, string command)
@@ -284,7 +284,7 @@ internal sealed class BluRayMmcCommands(IMmcCommandTransport transport)
         RequireLength(bytes, minimum, command);
         int declared = BinaryPrimitives.ReadUInt16BigEndian(bytes.AsSpan(0, 2)) + 2;
         if (declared < minimum || bytes.Length < Math.Min(declared, command == "READ TRACK INFORMATION" ? 48 : 64))
-            throw new IOException($"{command} 返回了无效的长度字段。");
+            throw new IOException($"{command} returned invalid length field.");
     }
 }
 
@@ -331,7 +331,7 @@ internal sealed class ImapiMmcCommandTransport(object recorder) : IMmcCommandTra
             using AlignedMmcWriteBuffer buffer = new(allocationLength, GetWriteTransferLimits());
             result = _recorder.SendCommandGetDataFromDevice(cdb, (uint)cdb.Length, sense,
                 timeoutSeconds, buffer.Pointer, (uint)data.Length, out uint fetched);
-            if (fetched > data.Length) throw new IOException("IMAPI 返回了超过接收缓冲区的长度。");
+            if (fetched > data.Length) throw new IOException("IMAPI returned length exceeding receive buffer.");
             Array.Resize(ref data, (int)fetched);
             if (fetched > 0) Marshal.Copy(buffer.Pointer, data, 0, (int)fetched);
         }

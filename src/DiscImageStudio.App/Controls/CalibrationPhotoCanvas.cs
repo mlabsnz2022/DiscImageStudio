@@ -37,7 +37,7 @@ public sealed class CalibrationPhotoCanvas : FrameworkElement
     public static readonly DependencyProperty ShowPredictionProperty = DependencyProperty.Register(nameof(ShowPrediction), typeof(bool), typeof(CalibrationPhotoCanvas), new FrameworkPropertyMetadata(true, Render));
     private static readonly DependencyPropertyKey ViewDescriptionPropertyKey = DependencyProperty.RegisterReadOnly(nameof(ViewDescription), typeof(string), typeof(CalibrationPhotoCanvas), new PropertyMetadata("100%"));
     public static readonly DependencyProperty ViewDescriptionProperty = ViewDescriptionPropertyKey.DependencyProperty;
-    private static readonly DependencyPropertyKey SelectionDescriptionPropertyKey = DependencyProperty.RegisterReadOnly(nameof(SelectionDescription), typeof(string), typeof(CalibrationPhotoCanvas), new PropertyMetadata("滚轮缩放，右键平移；拖动控制点贴合边缘。"));
+    private static readonly DependencyPropertyKey SelectionDescriptionPropertyKey = DependencyProperty.RegisterReadOnly(nameof(SelectionDescription), typeof(string), typeof(CalibrationPhotoCanvas), new PropertyMetadata("Scroll to zoom, right-click drag to pan; drag control points to fit edges."));
     public static readonly DependencyProperty SelectionDescriptionProperty = SelectionDescriptionPropertyKey.DependencyProperty;
 
     public BitmapSource? Image { get => (BitmapSource?)GetValue(ImageProperty); set => SetValue(ImageProperty, value); }
@@ -150,7 +150,7 @@ public sealed class CalibrationPhotoCanvas : FrameworkElement
             _selectedBoundary = (point.Boundary, point.Index);
             _dragOriginal = new Point(point.X, point.Y);
             SetValue(SelectionDescriptionPropertyKey, point.Boundary == CalibrationPhotoBoundaryKind.OuterEdge
-                ? "拖到盘片实体外缘；不要沿刻录区边界。" : "拖到实体内缘；不要沿透明塑料环。" );
+                ? "Drag to physical outer disc rim; do not align with recorded data edge." : "Drag to physical inner disc rim; do not align with transparent plastic ring." );
         }
         else if (CanEditTrace)
         {
@@ -225,7 +225,7 @@ public sealed class CalibrationPhotoCanvas : FrameworkElement
         if (TraceEditedCommand?.CanExecute(edit) != true) return;
         TraceEditedCommand.Execute(edit);
         _selectedTrace = null;
-        SetValue(SelectionDescriptionPropertyKey, "已删除此点；点击照片继续描当前曲线。" );
+        SetValue(SelectionDescriptionPropertyKey, "Point removed; click on photo to continue tracing current curve." );
         InvalidateVisual();
     }
 
@@ -259,13 +259,13 @@ public sealed class CalibrationPhotoCanvas : FrameworkElement
                     Brush pointBrush = outlier ? DiscTheme.Outlier : brush;
                     var screen = WorldToView(TraceDisplayPosition(point));
                     dc.DrawEllipse(pointBrush, new Pen(DiscTheme.Outline, 1.4), screen, selected ? 6 : 4, selected ? 6 : 4);
-                    if (selected) DrawText(dc, $"点 {point.Index + 1}", screen + new Vector(9, -16), pointBrush, 12);
+                    if (selected) DrawText(dc, $"Point {point.Index + 1}", screen + new Vector(9, -16), pointBrush, 12);
                 }
             }
         }
         if (ShowingTarget)
-            DrawCaption(dc, Image is null ? "标靶预览 · 导入照片后开始矫正" : "刻录图案预览 · 关闭预览后继续照片标定");
-        else if (IsRectificationPreview) DrawCaption(dc, "矫正预览 · 确认后开始描线");
+            DrawCaption(dc, Image is null ? "Target Preview · Import photo to begin rectification" : "Burn Pattern Preview · Close preview to continue photo calibration");
+        else if (IsRectificationPreview) DrawCaption(dc, "Rectification Preview · Confirm to begin tracing");
     }
 
     private void DrawBoundaries(DrawingContext dc)
@@ -346,7 +346,7 @@ public sealed class CalibrationPhotoCanvas : FrameworkElement
         UpdateTraceDescription();
     }
     private void UpdateTraceDescription() => SetValue(SelectionDescriptionPropertyKey,
-        _selectedTrace is { } point ? $"已选曲线上的点 {point.Index + 1} · 直接拖动修正，Delete 删除" : "点击照片上同一条可见曲线，由内向外连续描点。" );
+        _selectedTrace is { } point ? $"Selected curve point {point.Index + 1} · Drag to adjust, Delete to remove" : "Click along the same visible curve on the photo, plotting points continuously from inside out." );
     private static void OnViewportChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var canvas = (CalibrationPhotoCanvas)d;
@@ -355,8 +355,8 @@ public sealed class CalibrationPhotoCanvas : FrameworkElement
         canvas._selectedBoundary = null;
         canvas.ResetView();
         canvas.SetValue(SelectionDescriptionPropertyKey, canvas.IsPhotoStep
-            ? "滚轮缩放，右键平移；拖动控制点贴合边缘。"
-            : "滚轮缩放，右键平移；点击添加点，拖动已有点修正位置。" );
+            ? "Scroll to zoom, right-click drag to pan; drag control points to fit edges."
+            : "Scroll to zoom, right-click drag to pan; click to add points, drag to adjust." );
     }
     private static void OnCollectionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

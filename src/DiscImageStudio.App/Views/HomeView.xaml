@@ -1,8 +1,8 @@
 <UserControl x:Class="DiscImageStudio.Views.HomeView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:DiscImageStudio.Controls"
-             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks">
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:controls="clr-namespace:DiscImageStudio.Controls"
+              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks">
     <!-- The page padding lives on the content, not on the scroller, so the scroll rail sits at
          the window edge like every other workspace. -->
     <ScrollViewer controls:ScrollMaskBehavior.Enabled="True">
@@ -11,7 +11,7 @@
         <StackPanel MaxWidth="1120" Margin="{StaticResource PagePadding}">
             <TextBlock Text="Disc Image Studio" Style="{StaticResource H1Title}" />
             <TextBlock Style="{StaticResource PageSubtitle}" Margin="0,8,0,0"
-                       Text="全能的光盘盘面可见图像生成与刻录工作台" />
+                       Text="All-in-one disc surface image generation and burning workstation" />
 
             <!-- One card for the three ways forward: the open project on the left, starting
                  something else on the right. The project name appears once, on the control that
@@ -27,12 +27,12 @@
                             Height="{StaticResource ControlHeight}" Padding="18,0"
                             Command="{Binding ContinueProjectCommand}"
                             Visibility="{Binding IsProjectOpenVisibility}"
-                            ToolTip="回到打开的工程，从设计工作区继续。">
+                            ToolTip="Return to the open project and continue in the design workspace.">
                         <StackPanel Orientation="Horizontal">
                             <iconPacks:PackIconLucide Kind="ArrowLeft" Width="16" Height="16"
                                                       VerticalAlignment="Center"
                                                       Foreground="{DynamicResource PrimaryBrush}" />
-                            <TextBlock Text="返回工程" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Return to Project" Margin="8,0,0,0" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding CurrentProjectName}" Margin="8,0,0,0"
                                        VerticalAlignment="Center" MaxWidth="260"
                                        TextTrimming="CharacterEllipsis"
@@ -40,10 +40,10 @@
                         </StackPanel>
                     </Button>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Style="{StaticResource SecondaryButton}" Content="打开工程"
+                        <Button Style="{StaticResource SecondaryButton}" Content="Open Project"
                                 Height="{StaticResource ControlHeight}" Padding="18,0"
                                 Command="{Binding OpenProjectCommand}" />
-                        <Button Style="{StaticResource PrimaryButton}" Content="新建工程"
+                        <Button Style="{StaticResource PrimaryButton}" Content="New Project"
                                 Height="{StaticResource ControlHeight}" Padding="18,0" Margin="10,0,0,0"
                                 Command="{Binding NewProjectCommand}" />
                     </StackPanel>
@@ -52,7 +52,7 @@
 
             <!-- Sections follow the Adobe start-page idiom: a bare heading and the content
                  sitting directly on the page, no surrounding card. -->
-            <TextBlock Text="从模板开始" Style="{StaticResource CardTitle}" Margin="0,32,0,8" />
+            <TextBlock Text="Start from Template" Style="{StaticResource CardTitle}" Margin="0,32,0,8" />
             <!-- Tiles left-align with the section heading; a hanging last row is correct in
                  the flat, Adobe-style layout. -->
             <ItemsControl ItemsSource="{Binding Templates}">
@@ -83,7 +83,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- No recents means no section: an empty "最近工程" heading is noise on first run. -->
+            <!-- No recents means no section: an empty "Recent Projects" heading is noise on first run. -->
             <StackPanel>
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
@@ -100,11 +100,11 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="最近工程" Style="{StaticResource CardTitle}"
+                    <TextBlock Grid.Column="0" Text="Recent Projects" Style="{StaticResource CardTitle}"
                                VerticalAlignment="Center" />
-                    <Button Grid.Column="1" Style="{StaticResource QuietButton}" Content="清空"
-                            Height="{StaticResource CompactHeight}" Padding="14,0"
-                            Command="{Binding ClearRecentsCommand}" />
+                    <Button Grid.Column="1" Style="{StaticResource QuietButton}" Content="Clear"
+                             Height="{StaticResource CompactHeight}" Padding="14,0"
+                             Command="{Binding ClearRecentsCommand}" />
                 </Grid>
                 <!-- Three mini tiles per row at any window width: UniformGrid stretches the
                      tiles, the sleeve's 3*:1* template shrinks with them. Tag carries the
@@ -132,7 +132,7 @@
                                                         ToolTip="{Binding ToolTipText}">
                                 <controls:RecentProjectCard.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Header="从列表中移除"
+                                        <MenuItem Header="Remove from List"
                                                   Command="{Binding PlacementTarget.Tag,
                                                             RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                   CommandParameter="{Binding}" />

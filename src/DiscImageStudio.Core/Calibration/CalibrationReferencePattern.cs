@@ -41,7 +41,7 @@ public static class CalibrationReferencePattern
         input.CopyTo(output);
         byte[] bytes = output.ToArray();
         if (!Convert.ToHexString(SHA256.HashData(bytes)).Equals(PngSha256, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("标定图案 PNG 与固定参考文件不一致。");
+            throw new InvalidDataException("Calibration pattern PNG does not match fixed reference file.");
         return bytes;
     }
 
@@ -94,11 +94,11 @@ public static class CalibrationReferencePattern
         compressed.ReadExactly(pixels);
         if (compressed.ReadByte() != -1
             || !Convert.ToHexString(SHA256.HashData(pixels)).Equals(GraySha256, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("标定图案像素与固定参考文件不一致。");
+            throw new InvalidDataException("Calibration pattern pixels do not match fixed reference file.");
         return pixels;
     }
 
     private static Stream Open(string name) => typeof(CalibrationReferencePattern).Assembly
         .GetManifestResourceStream(ResourcePrefix + name)
-        ?? throw new InvalidOperationException("缺少内置标定参考图案资源。");
+        ?? throw new InvalidOperationException("Missing built-in calibration reference pattern resource.");
 }

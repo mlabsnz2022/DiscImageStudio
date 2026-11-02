@@ -158,7 +158,7 @@ public partial class HomeViewModel : ObservableObject
         string nature = family switch
         {
             OpticalDiscFamily.Dvd => "DVD",
-            OpticalDiscFamily.BluRay => "蓝光",
+            OpticalDiscFamily.BluRay => "Blu-ray",
             _ => "CD",
         };
 
@@ -207,8 +207,8 @@ public partial class HomeViewModel : ObservableObject
         if (!File.Exists(entry.ProjectPath))
         {
             _shell.ShowToast(
-                "无法打开工程",
-                $"工程文件已移动或删除：\n{entry.ProjectPath}",
+                "Cannot Open Project",
+                $"Project file has been moved or deleted:\n{entry.ProjectPath}",
                 ToastKind.Warning);
             return;
         }
@@ -236,7 +236,7 @@ public partial class HomeViewModel : ObservableObject
     }
 
     /// <summary>Presets name themselves after what the disc is; a trailing 「（…）」 marks how
-    /// the parameters were obtained (实测) and is dropped from the card title, where long names
+    /// the parameters were obtained (Calibrated) and is dropped from the card title, where long names
     /// would be clipped.</summary>
     private static string StripQualifier(string displayName)
     {

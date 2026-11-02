@@ -130,7 +130,7 @@ public partial class TitleBar : UserControl
     private void UpdateGlyph()
     {
         bool maximized = _window?.WindowState == WindowState.Maximized;
-        MaximizeButton.ToolTip = maximized ? "还原" : "最大化";
+        MaximizeButton.ToolTip = maximized ? "Restore" : "Maximize";
         if (_maximizeGlyph is null || _restoreGlyph is null)
         {
             return;

@@ -73,7 +73,7 @@ internal sealed class CalibrationGeometry
         if (_constant is not null)
         {
             if (!_constant.TryAtProgress(progress, out double constantRadius))
-                throw new ArgumentException("该进度没有有效的正半径轨迹。");
+                throw new ArgumentException("This progress has no valid positive radius trajectory.");
             return (constantRadius, AngleAtRadius(constantRadius));
         }
         double radius = _dvd is null

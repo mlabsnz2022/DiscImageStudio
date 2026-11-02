@@ -65,7 +65,7 @@ public partial class SettingsViewModel : ObservableObject
     /// <summary>Folder picker, supplied by the window: dialog title plus a starting folder.</summary>
     public Func<string, string?, string?>? PickDirectory { get; set; }
 
-    /// <summary>Double confirmation for 清空缓存, supplied by the window.</summary>
+    /// <summary>Double confirmation for Clear Cache, supplied by the window.</summary>
     public Func<Task<bool>>? ConfirmClearCache { get; set; }
 
     /// <summary>Reads the shell's busy flag so clearing stays disabled during a job.</summary>
@@ -78,7 +78,7 @@ public partial class SettingsViewModel : ObservableObject
     public void RefreshCacheUsage()
     {
         ActiveCacheDirectory = TempFiles.LivePreviewDirectory;
-        CacheUsageText = "已用 " + FormatSize(TempFiles.GetCacheSize());
+        CacheUsageText = "Used " + FormatSize(TempFiles.GetCacheSize());
     }
 
     /// <summary>Validates the fields, persists the settings and reports whether the dialog may
@@ -122,7 +122,7 @@ public partial class SettingsViewModel : ObservableObject
                                               or ArgumentException
                                               or SecurityException)
         {
-            ErrorMessage = "无法保存设置：" + exception.Message;
+            ErrorMessage = "Failed to save settings: " + exception.Message;
             return false;
         }
 
@@ -136,7 +136,7 @@ public partial class SettingsViewModel : ObservableObject
         string start = string.IsNullOrWhiteSpace(DefaultProjectDirectory)
             ? DefaultProjectDirectoryPlaceholder
             : DefaultProjectDirectory;
-        string? picked = PickDirectory?.Invoke("选择默认工程位置", start);
+        string? picked = PickDirectory?.Invoke("Select Default Project Location", start);
         if (!string.IsNullOrWhiteSpace(picked))
         {
             DefaultProjectDirectory = picked;
@@ -152,7 +152,7 @@ public partial class SettingsViewModel : ObservableObject
         string start = string.IsNullOrWhiteSpace(CacheDirectory)
             ? DefaultCacheDirectoryPlaceholder
             : CacheDirectory;
-        string? picked = PickDirectory?.Invoke("选择缓存位置", start);
+        string? picked = PickDirectory?.Invoke("Select Cache Location", start);
         if (!string.IsNullOrWhiteSpace(picked))
         {
             CacheDirectory = picked;
@@ -173,8 +173,8 @@ public partial class SettingsViewModel : ObservableObject
         int removed = TempFiles.ClearCache();
         RefreshCacheUsage();
         CacheMessage = removed > 0
-            ? $"已删除 {removed} 个缓存文件。"
-            : "缓存目录中没有可清理的文件。";
+            ? $"Deleted {removed} cached file(s)."
+            : "No files to clean up in cache directory.";
     }
 
     private bool CanClearCache() => !IsBusy;
@@ -198,7 +198,7 @@ public partial class SettingsViewModel : ObservableObject
                                               or UnauthorizedAccessException
                                               or System.ComponentModel.Win32Exception)
         {
-            ErrorMessage = "无法打开应用数据目录：" + exception.Message;
+            ErrorMessage = "Cannot open app data directory: " + exception.Message;
         }
     }
 
@@ -220,7 +220,7 @@ public partial class SettingsViewModel : ObservableObject
         string trimmed = value.Trim();
         if (!Path.IsPathRooted(trimmed))
         {
-            error = "请填写绝对路径。";
+            error = "Please enter an absolute path.";
             return false;
         }
 
@@ -233,13 +233,13 @@ public partial class SettingsViewModel : ObservableObject
                                               or NotSupportedException
                                               or SecurityException)
         {
-            error = "路径无效：" + trimmed;
+            error = "Invalid path: " + trimmed;
             return false;
         }
 
         if (requireExisting && !Directory.Exists(fullPath))
         {
-            error = "目录不存在：" + fullPath;
+            error = "Directory does not exist: " + fullPath;
             return false;
         }
 

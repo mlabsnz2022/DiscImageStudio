@@ -20,7 +20,7 @@ public partial class PathField : UserControl
 
     public static readonly DependencyProperty ButtonLabelProperty = DependencyProperty.Register(
         nameof(ButtonLabel), typeof(string), typeof(PathField),
-        new PropertyMetadata("浏览", static (sender, _) => ((PathField)sender).UpdateTexts()));
+        new PropertyMetadata("Browse", static (sender, _) => ((PathField)sender).UpdateTexts()));
 
     public static readonly DependencyProperty CommandProperty = DependencyProperty.Register(
         nameof(Command), typeof(ICommand), typeof(PathField),

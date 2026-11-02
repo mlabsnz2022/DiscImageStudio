@@ -17,7 +17,7 @@ public static partial class CalibrationCrossFitter
         int radialLevels = data.Select(d => Math.Round(d.Radius, 4)).Distinct().Count();
         if (radialLevels < 12 || coverage < 0.6)
         {
-            warnings.Add("三次轨距拟合需要至少 12 个不同半径的点且覆盖至少 60% 绘图区；本次保持轨距系数，只拟合内外半径。");
+            warnings.Add("Cubic pitch fitting requires at least 12 points at different radii covering at least 60% of drawing area; keeping pitch coefficients and fitting radii only.");
             return Baseline();
         }
         // Do not invent additional coefficients for a curve already explained to sub-micron
@@ -108,31 +108,31 @@ public static partial class CalibrationCrossFitter
         solutions.Sort((a, b) => a.Cost.CompareTo(b.Cost));
         if (solutions.Count == 0 || solutions[0].Cost >= baseline[0].RobustCost * 0.995)
         {
-            warnings.Add("三次轨距没有带来稳定改善，保留原轨距系数；可增加内、中、外圈点位后重试。");
+            warnings.Add("Cubic pitch did not provide stable improvement; keeping original pitch coefficients. Add points and retry.");
             return Baseline();
         }
         CubicSolution best = solutions[0];
         if (!CubicJacobian(best, Evaluate, out double[][] jacobian)
             || JacobianIndependence(jacobian, data) < 1e-7)
         {
-            warnings.Add("当前点位无法稳定区分三个轨距系数与内外半径，本次保留原轨距系数；请扩大径向覆盖并提高点位精度。");
+            warnings.Add("Current points cannot stably distinguish three pitch coefficients from radii; keeping original pitch coefficients.");
             return Baseline();
         }
         // Radius-only diagnostics describe the discarded baseline, not this candidate.
-        warnings.RemoveAll(w => w.StartsWith("曲线偏差较大", StringComparison.Ordinal)
-            || w.StartsWith("最佳结果靠近", StringComparison.Ordinal)
-            || w.StartsWith("当前曲线对两个半径", StringComparison.Ordinal)
-            || w.StartsWith("存在形状接近", StringComparison.Ordinal));
+        warnings.RemoveAll(w => w.StartsWith("Large curve deviation", StringComparison.Ordinal)
+            || w.StartsWith("Optimal result near", StringComparison.Ordinal)
+            || w.StartsWith("Current curve cannot distinguish", StringComparison.Ordinal)
+            || w.StartsWith("Multiple shape candidates", StringComparison.Ordinal));
         if (best.Rms > delta * 2)
-            warnings.Add("曲线偏差较大，请检查照片矫正、点位和是否始终沿同一条线标点。");
+            warnings.Add("Large curve deviation; check photo rectification, point accuracy, and single-curve continuity.");
         if (Math.Max(Math.Abs(best.Parameters.InnerRadiusMm - center.InnerRadiusMm),
             Math.Abs(best.Parameters.OuterRadiusMm - center.OuterRadiusMm)) > options.RadiusRangeMm * 0.995)
-            warnings.Add("最佳结果靠近搜索边界，建议扩大搜索范围并补充曲线点复核。");
-        warnings.Add("已拟合 DVD 三次轨距；三个形状系数与内外半径可能互相补偿，低残差不表示参数唯一，应用前请核对整条预测曲线。");
+            warnings.Add("Optimal result near search boundary; consider expanding search range and adding points.");
+        warnings.Add("Fitted DVD cubic pitch; coefficients and radii may compensate for each other. Verify full predicted curve before applying.");
         if (Math.Max(Math.Abs(best.Parameters.PitchLinear - center.PitchLinear),
             Math.Max(Math.Abs(best.Parameters.PitchQuadratic - center.PitchQuadratic),
                 Math.Abs(best.Parameters.PitchCubic - center.PitchCubic))) > options.PitchCoefficientRange * 0.995)
-            warnings.Add("轨距系数接近搜索边界，请复核点位，必要时扩大系数搜索范围。");
+            warnings.Add("Pitch coefficients near search boundary; verify points or expand search range.");
         CalibrationFitCandidate[] candidates = solutions.Take(options.MaxCandidates).Select(solution =>
         {
             (double maxError, int outliers) = ResidualStats(solution.Residuals, delta);

@@ -190,7 +190,7 @@ internal static class UiPreviewRenderer
         if (mode == "edit")
         {
             viewModel.Family = OpticalDiscFamily.Dvd;
-            viewModel.Name = "示例工程";
+            viewModel.Name = "Sample Project";
             viewModel.InnerRadiusText = "24.0";
             viewModel.OuterRadiusText = "58.0";
             viewModel.SectorsText = "2295104";

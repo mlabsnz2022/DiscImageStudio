@@ -47,7 +47,7 @@ public partial class CalibrationViewModel : ObservableObject
         ApplyParametersCommand = new RelayCommand(ApplyParameters, CanApplyParameters);
         InitializePhotoCommands();
         shell.BusyChanged += () => { OnPropertyChanged(nameof(IsBusy)); RefreshCommands(); };
-        // The parameter read-out under 从当前参数建新标靶 follows the shared parameter store:
+        // The parameter read-out under Create Target from Current Parameters follows the shared parameter store:
         // presets, project edits and applied calibration results all re-render it.
         state.PropertyChanged += (_, _) => OnPropertyChanged(nameof(CurrentParametersSummary));
     }
@@ -61,12 +61,12 @@ public partial class CalibrationViewModel : ObservableObject
     // Auto starts at the tight box and widens only when the optimum touches its edge, so
     // healthy discs are not silently clamped to a user-picked boundary.
     public IReadOnlyList<CoarseSearchRange> CoarseSearchRangeChoices { get; } =
-        [new("自动（推荐）", 0.02, Auto: true), new("±0.02 mm", 0.02),
+        [new("Auto (Recommended)", 0.02, Auto: true), new("±0.02 mm", 0.02),
          new("±0.1 mm", 0.1), new("±0.5 mm", 0.5)];
-    [ObservableProperty] private CoarseSearchRange _selectedCoarseSearchRange = new("自动（推荐）", 0.02, Auto: true);
+    [ObservableProperty] private CoarseSearchRange _selectedCoarseSearchRange = new("Auto (Recommended)", 0.02, Auto: true);
     public string SearchRangeHeader => SelectedCoarseSearchRange.Auto
-        ? "搜索范围（自动）"
-        : $"搜索范围（{SelectedCoarseSearchRange.Label}）";
+        ? "Search Range (Auto)"
+        : $"Search Range ({SelectedCoarseSearchRange.Label})";
     private double _fitRangeMm = 0.02;
     private bool _fitRangeExpanded;
     [ObservableProperty] private bool _contourConfirmed;
@@ -82,7 +82,7 @@ public partial class CalibrationViewModel : ObservableObject
     /// <summary>Last operation message, kept for diagnostics (tests, future consumers);
     /// the log page carries the same lines.</summary>
     public string LastStatusMessage => _statusMessage;
-    [ObservableProperty] private string _fitAssessment = "全部有效点都会参与计算，结果需与实拍曲线核对。";
+    [ObservableProperty] private string _fitAssessment = "All valid points participate in computation; verify result against photo curve.";
     public bool IsBusy => _shell.IsBusy;
     public CalibrationTarget? Target => _target;
     public bool CdInterleave => _cdInterleave;
@@ -92,10 +92,10 @@ public partial class CalibrationViewModel : ObservableObject
     /// inputs stay visible without a disc-type selector.</summary>
     public string CurrentParametersSummary => SelectedDiscType switch
     {
-        "DVD" => $"内半径 {Trimmed(_state.DvdInnerRadius)} mm · 外半径 {Trimmed(_state.DvdOuterRadius)} mm · 三次项 {Trimmed(_state.DvdPitchCubic)}",
-        "BD" => $"内半径 {Trimmed(_state.BdInnerRadius)} mm · 外半径 {Trimmed(_state.BdOuterRadius)} mm · "
-            + $"{Trimmed(_state.BdTotalSectors)} 扇区",
-        _ => $"内半径 {Trimmed(_state.CdInnerRadius)} mm · 外半径 {Trimmed(_state.CdOuterRadius)} mm",
+        "DVD" => $"Inner radius {Trimmed(_state.DvdInnerRadius)} mm · Outer radius {Trimmed(_state.DvdOuterRadius)} mm · Cubic term {Trimmed(_state.DvdPitchCubic)}",
+        "BD" => $"Inner radius {Trimmed(_state.BdInnerRadius)} mm · Outer radius {Trimmed(_state.BdOuterRadius)} mm · "
+            + $"{Trimmed(_state.BdTotalSectors)} sectors",
+        _ => $"Inner radius {Trimmed(_state.CdInnerRadius)} mm · Outer radius {Trimmed(_state.CdOuterRadius)} mm",
     };
 
     private static string Trimmed(string value) =>
@@ -215,14 +215,14 @@ public partial class CalibrationViewModel : ObservableObject
             CalibrationParameters p = SelectedDiscType switch
             {
                 "DVD" => new(CalibrationDiscKind.Dvd, Number(_state.DvdInnerRadius), Number(_state.DvdOuterRadius),
-                    ParameterParser.ParsePositiveLong(_state.DvdTotalSectors, "DVD 扇区数"),
+                    ParameterParser.ParsePositiveLong(_state.DvdTotalSectors, "DVD Sectors"),
                     DvdStreamingOptions.StandardChannelBitLengthNm,
-                    ParameterParser.ParseDouble(_state.DvdPitchLinear, "DVD 相对一次项"),
-                    ParameterParser.ParseDouble(_state.DvdPitchQuadratic, "DVD 相对二次项"),
-                    ParameterParser.ParseDouble(_state.DvdPitchCubic, "DVD 相对三次项")),
+                    ParameterParser.ParseDouble(_state.DvdPitchLinear, "DVD Linear Term"),
+                    ParameterParser.ParseDouble(_state.DvdPitchQuadratic, "DVD Quadratic Term"),
+                    ParameterParser.ParseDouble(_state.DvdPitchCubic, "DVD Cubic Term")),
                 "BD" => CreateBluRayParameters(),
                 _ => new(CalibrationDiscKind.Cd, Number(_state.CdInnerRadius), Number(_state.CdOuterRadius),
-                    ParameterParser.ParsePositiveLong(_state.CdSectors, "CD 扇区数"),
+                    ParameterParser.ParsePositiveLong(_state.CdSectors, "CD Sectors"),
                     CdDiscParameters.StandardLinearVelocityMmPerSecond),
             };
             ValidateOutputParameters(p);
@@ -233,14 +233,14 @@ public partial class CalibrationViewModel : ObservableObject
         catch (Exception ex) { Report(ex); }
     }
 
-    private static double Number(string raw) => ParameterParser.ParsePositiveDouble(raw, "标定参数");
+    private static double Number(string raw) => ParameterParser.ParsePositiveDouble(raw, "Calibration Parameters");
 
     private CalibrationParameters CreateBluRayParameters()
     {
-        long sectors = ParameterParser.ParsePositiveLong(_state.BdTotalSectors, "蓝光总扇区数");
+        long sectors = ParameterParser.ParsePositiveLong(_state.BdTotalSectors, "Blu-ray Total Sectors");
         if (sectors > uint.MaxValue)
         {
-            throw new ArgumentOutOfRangeException("蓝光总扇区数", "总扇区数超出蓝光引擎支持范围。");
+            throw new ArgumentOutOfRangeException("Blu-ray Total Sectors", "Total sectors exceeds Blu-ray engine supported range.");
         }
 
         uint totalSectors = checked((uint)sectors);
@@ -316,7 +316,7 @@ public partial class CalibrationViewModel : ObservableObject
         CoarseCandidates = [];
         SelectedCoarseCandidate = null;
         _fitRangeExpanded = false;
-        FitAssessment = "全部有效点都会参与计算，结果需与实拍曲线核对。";
+        FitAssessment = "All valid points participate in computation; verify result against photo curve.";
         ApplyParametersCommand.NotifyCanExecuteChanged();
     }
 
@@ -333,7 +333,7 @@ public partial class CalibrationViewModel : ObservableObject
     {
         if (!_installing) InvalidateFit();
     }
-    private CalibrationSession Session() => new(_target ?? throw new InvalidOperationException("请先创建图案。"),
+    private CalibrationSession Session() => new(_target ?? throw new InvalidOperationException("Please create pattern first."),
         [], FitOptions(), _cdInterleave, PhotoSession());
 
     private async Task SolveAsync()
@@ -344,7 +344,7 @@ public partial class CalibrationViewModel : ObservableObject
         var traces = CrossTraces();
         var options = FitOptions();
         int pointCount = traces.Sum(trace => trace.Points.Count);
-        await RunAsync($"正在用全部 {pointCount} 个曲线点计算参数…", async token =>
+        await RunAsync($"Computing parameters with all {pointCount} curve points…", async token =>
         {
             _isSolving = true;
             FitAttempt attempt = await Task.Run(() => FitWithAutoRange(
@@ -353,7 +353,7 @@ public partial class CalibrationViewModel : ObservableObject
             _fitRangeMm = attempt.RangeMm;
             _fitRangeExpanded = attempt.Expanded;
             var candidates = result.Candidates.Select((c, index) =>
-                new CoarseCandidate($"候选 {index + 1} · 偏差 {c.RmsErrorMm:0.###} mm", c.Parameters,
+                new CoarseCandidate($"Candidate {index + 1} · Deviation {c.RmsErrorMm:0.###} mm", c.Parameters,
                     c.RotationRadians, c.RmsErrorMm, c.MaxErrorMm, c.OutlierCount)).ToArray();
             token.ThrowIfCancellationRequested();
             if (revision != _inputRevision || !ReferenceEquals(target, _target)) throw new OperationCanceledException();
@@ -368,11 +368,11 @@ public partial class CalibrationViewModel : ObservableObject
             token.ThrowIfCancellationRequested();
             UpdateFitAssessment();
             if (!result.Succeeded)
-                _statusMessage = $"计算未通过，已保留全部 {pointCount} 点。\n{string.Join("\n", result.Warnings)}";
+                _statusMessage = $"Computation did not converge, all {pointCount} points retained.\n{string.Join("\n", result.Warnings)}";
             else if (SelectedCoarseCandidate is { } selected && !CandidateResidualAccepted(selected))
-                _statusMessage = $"候选与实拍点偏差较大，暂不能应用；全部 {pointCount} 点已保留。请修正标红点或补充曲线点。";
+                _statusMessage = $"Large deviation between candidates and photo points; all {pointCount} points retained. Please adjust red points or add curve points.";
             else if (_previewReady)
-                _statusMessage = $"已用全部 {pointCount} 点生成参数候选{(attempt.Expanded ? $"，搜索范围自动扩大至 ±{attempt.RangeMm:0.###} mm" : string.Empty)}。请核对橙色预测是否沿青色实拍点连续贴合，再决定是否应用。";
+                _statusMessage = $"Generated parameter candidates using all {pointCount} points{(attempt.Expanded ? $", search range expanded to ±{attempt.RangeMm:0.###} mm" : string.Empty)}. Check that orange prediction aligns with cyan photo points before applying.";
         });
     }
 
@@ -421,42 +421,42 @@ public partial class CalibrationViewModel : ObservableObject
 
     private static bool IsInputFailure(CalibrationFitResult result) => !result.Succeeded
         && result.Warnings.Any(warning =>
-            warning.Contains("至少标出", StringComparison.Ordinal)
-            || warning.Contains("覆盖范围太窄", StringComparison.Ordinal)
-            || warning.Contains("向内回退", StringComparison.Ordinal)
-            || warning.Contains("接近半圈", StringComparison.Ordinal)
-            || warning.Contains("转角过大", StringComparison.Ordinal));
+            warning.Contains("at least", StringComparison.Ordinal)
+            || warning.Contains("too narrow", StringComparison.Ordinal)
+            || warning.Contains("falls inward", StringComparison.Ordinal)
+            || warning.Contains("half a turn", StringComparison.Ordinal)
+            || warning.Contains("too large", StringComparison.Ordinal));
 
     private void UpdateFitAssessment()
     {
         if (_fit is null)
         {
-            FitAssessment = "全部有效点都会参与计算，结果需与实拍曲线核对。";
+            FitAssessment = "All valid points participate in computation; verify result against photo curve.";
             return;
         }
         if (!_fit.Succeeded)
         {
-            FitAssessment = _fit.Warnings.FirstOrDefault() ?? "计算未通过，全部点已保留。";
+            FitAssessment = _fit.Warnings.FirstOrDefault() ?? "Computation did not converge; all points retained.";
             return;
         }
         if (SelectedCoarseCandidate is not { } candidate)
         {
-            FitAssessment = "没有可应用的候选。";
+            FitAssessment = "No applicable candidates.";
             return;
         }
 
         bool accepted = CandidateResidualAccepted(candidate);
         string range = _fitRangeExpanded
-            ? $"\n已自动扩大搜索至 ±{_fitRangeMm:0.###} mm。"
+            ? $"\nSearch automatically expanded to ±{_fitRangeMm:0.###} mm。"
             : string.Empty;
         if (_fit.BoundaryLimited)
-            range += "\n最优靠近搜索边界，请补充曲线点或检查点位。";
+            range += "\nOptimal result is near search boundary; add points or check placement.";
         string outliers = OutlierTracePointIndices.Count > 0
-            ? $"\n已标记 {OutlierTracePointIndices.Count} 个偏离较大的点。"
+            ? $"\nMarked {OutlierTracePointIndices.Count} points with large deviation."
             : string.Empty;
         FitAssessment = accepted
-            ? $"候选 · 平均偏差 {candidate.RmsErrorMm:0.###} mm · 最大 {candidate.MaxErrorMm:0.###} mm，待核对{range}{outliers}"
-            : $"未通过 · 平均偏差 {candidate.RmsErrorMm:0.###} mm · 最大 {candidate.MaxErrorMm:0.###} mm，不能应用{range}{outliers}";
+            ? $"Candidate · Mean dev {candidate.RmsErrorMm:0.###} mm · Max {candidate.MaxErrorMm:0.###} mm, awaiting verification{range}{outliers}"
+            : $"Failed · Mean dev {candidate.RmsErrorMm:0.###} mm · Max {candidate.MaxErrorMm:0.###} mm, cannot apply{range}{outliers}";
     }
 
     private void ApplyParameters()
@@ -493,8 +493,8 @@ public partial class CalibrationViewModel : ObservableObject
             CalibrationDiscKind.BluRay => "BD",
             _ => "DVD",
         };
-        _statusMessage = $"已应用到 {family} 参数。原标定盘记录仍保留，可继续补点核对。";
-        _shell.AppendLog($"[{DateTime.Now:HH:mm:ss}] 标定 {Target?.Id}: {_statusMessage} 内半径={ri}, 外半径={ro}\n");
+        _statusMessage = $"Applied to {family} parameters. Original calibration record retained for further verification.";
+        _shell.AppendLog($"[{DateTime.Now:HH:mm:ss}] Calibration {Target?.Id}: {_statusMessage} InnerRadius={ri}, OuterRadius={ro}\n");
         _shell.NotifyCalibrationParametersApplied();
     }
 
@@ -589,7 +589,7 @@ public partial class CalibrationViewModel : ObservableObject
         if (_target is null) return;
         bool discImage = _target.Parameters.Kind is CalibrationDiscKind.Dvd or CalibrationDiscKind.BluRay;
         string? path = _shell.Dialogs?.PickSave(
-            discImage ? "光盘镜像|*.iso" : "CD 音轨|*.wav|CD 原始音轨|*.raw",
+            discImage ? "Disc Image|*.iso" : "CD Audio Track|*.wav|CD Raw Audio Track|*.raw",
             discImage ? ".iso" : ".wav",
             $"calibration-{_target.Id[..8]}{(discImage ? ".iso" : ".wav")}");
         if (path is not null) OutputPath = path;
@@ -598,15 +598,15 @@ public partial class CalibrationViewModel : ObservableObject
     private async Task ExportPngAsync()
     {
         if (_target is not { } target) return;
-        string? path = _shell.Dialogs?.PickSave("PNG 图案|*.png", ".png", $"calibration-{target.Id[..8]}.png");
+        string? path = _shell.Dialogs?.PickSave("PNG Pattern|*.png", ".png", $"calibration-{target.Id[..8]}.png");
         if (path is null) return;
-        await RunAsync("正在导出图案…", async token =>
+        await RunAsync("Exporting pattern…", async token =>
         {
             BitmapSource image = await Task.Run(() => CalibrationPatternRenderer.RenderEncodingImage(target, token), token);
             CalibrationPatternRenderer.SavePng(image, path);
             CalibrationSessionJson.Save(Path.ChangeExtension(path, ".calibration.json"), Session());
             _shell.RegisterOutput(path);
-            _statusMessage = "PNG 与标定记录已导出。刻录请使用本页的生成或流式刻录按钮，以保持坐标比例。";
+            _statusMessage = "PNG and calibration record exported. Use the generate or streaming burn buttons on this page to maintain coordinate scale.";
         });
     }
 
@@ -622,11 +622,11 @@ public partial class CalibrationViewModel : ObservableObject
             string extension = Path.GetExtension(path).ToLowerInvariant();
             bool discImage = target.Parameters.Kind is CalibrationDiscKind.Dvd or CalibrationDiscKind.BluRay;
             if (discImage ? extension != ".iso" : extension is not (".wav" or ".raw"))
-                throw new ArgumentException("请选择 DVD/BD 的 .iso 或 CD 的 .wav / .raw 输出文件。");
+                throw new ArgumentException("Please choose a .iso file for DVD/BD or .wav / .raw for CD.");
         }
         catch (Exception ex) { Report(ex); return; }
         var session = Session();
-        await RunAsync("正在生成标定文件…", async token =>
+        await RunAsync("Generating calibration file…", async token =>
         {
             string directory = Path.GetDirectoryName(path)!;
             Directory.CreateDirectory(directory);
@@ -665,7 +665,7 @@ public partial class CalibrationViewModel : ObservableObject
                 CalibrationOutputPublisher.Publish(staging, directory);
                 _sessionPath = Path.ChangeExtension(path, ".calibration.json");
                 _shell.RegisterOutput(path);
-                _statusMessage = "标定文件与同名标定记录已生成。刻录后打开记录、导入照片，即可矫正和描线。";
+                _statusMessage = "Calibration files generated. After burning, open session and import photo to rectify and trace.";
             }
             finally { Directory.Delete(staging, recursive: true); }
         });
@@ -675,7 +675,7 @@ public partial class CalibrationViewModel : ObservableObject
     {
         if (parameters.Kind != CalibrationDiscKind.BluRay)
         {
-            throw new ArgumentException("标定参数不是蓝光目标。", nameof(parameters));
+            throw new ArgumentException("Calibration parameters are not a Blu-ray target.", nameof(parameters));
         }
 
         BluRayDiscParameters disc = new(
@@ -710,10 +710,10 @@ public partial class CalibrationViewModel : ObservableObject
     private void SaveSession()
     {
         if (_target is null) return;
-        string? path = _shell.Dialogs?.PickSave("标定记录|*.calibration.json", ".calibration.json",
+        string? path = _shell.Dialogs?.PickSave("Calibration Session|*.calibration.json", ".calibration.json",
             _sessionPath is null ? $"calibration-{_target.Id[..8]}.calibration.json" : Path.GetFileName(_sessionPath));
         if (path is null) return;
-        try { SaveSessionTo(path); _statusMessage = "已保存图案、生成参数、照片、边界和曲线点。"; }
+        try { SaveSessionTo(path); _statusMessage = "Saved pattern, parameters, photo, boundaries, and curve points."; }
         catch (Exception ex) { Report(ex); }
     }
 
@@ -726,7 +726,7 @@ public partial class CalibrationViewModel : ObservableObject
 
     private async Task OpenSessionAsync()
     {
-        string? path = _shell.Dialogs?.PickOpen(title: "打开标定记录", filter: "标定记录|*.calibration.json;*.json");
+        string? path = _shell.Dialogs?.PickOpen(title: "Open Calibration Session", filter: "Calibration Session|*.calibration.json;*.json");
         if (path is null) return;
         await LoadSessionFromAsync(path);
     }
@@ -746,7 +746,7 @@ public partial class CalibrationViewModel : ObservableObject
         if (_target is null) return false;
         try
         {
-            string? path = _sessionPath ?? _shell.Dialogs?.PickSave("标定记录|*.calibration.json", ".calibration.json",
+            string? path = _sessionPath ?? _shell.Dialogs?.PickSave("Calibration Session|*.calibration.json", ".calibration.json",
                 $"calibration-{_target.Id[..8]}.calibration.json");
             if (path is null) return false;
             SaveSessionTo(path);
@@ -777,12 +777,12 @@ public partial class CalibrationViewModel : ObservableObject
         _cancellation = new();
         _shell.SetBusy(true);
         _statusMessage = message;
-        _shell.AppendLog($"[{DateTime.Now:HH:mm:ss}] 标定：{message}\n");
+        _shell.AppendLog($"[{DateTime.Now:HH:mm:ss}] Calibration: {message}\n");
         try { await action(_cancellation.Token); }
         catch (OperationCanceledException)
         {
             if (_isSolving) InvalidateFit();
-            _statusMessage = "操作已取消。";
+            _statusMessage = "Operation cancelled.";
         }
         catch (Exception ex) { Report(ex); }
         finally
@@ -790,14 +790,14 @@ public partial class CalibrationViewModel : ObservableObject
             _isSolving = false;
             _cancellation.Dispose(); _cancellation = null;
             _shell.SetBusy(false);
-            _shell.AppendLog($"[{DateTime.Now:HH:mm:ss}] 标定：{_statusMessage}\n");
+            _shell.AppendLog($"[{DateTime.Now:HH:mm:ss}] Calibration: {_statusMessage}\n");
         }
     }
 
     private void Report(Exception ex)
     {
         _statusMessage = ex.Message;
-        _shell.ShowToast("标定操作未完成", ex.Message, ToastKind.Error);
+        _shell.ShowToast("Calibration Incomplete", ex.Message, ToastKind.Error);
     }
 
     private void RefreshCommands()

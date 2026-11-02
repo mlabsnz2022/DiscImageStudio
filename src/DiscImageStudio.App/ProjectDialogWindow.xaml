@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:DiscImageStudio.Controls"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        Title="新建工程"
+        Title="New Project"
         Width="992" Height="640"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None" ResizeMode="NoResize"
@@ -49,7 +49,7 @@
             <Setter Property="Width" Value="148" />
             <Setter Property="Cursor" Value="Hand" />
             <!-- Right-click removal, same idiom as the recent-project tiles on the home page.
-                 Only user presets ("自定") enable the menu: built-in presets live in the
+                 Only user presets ("Custom") enable the menu: built-in presets live in the
                  embedded catalog and have no user file entry to remove. Tag carries the
                  command because the menu lives in a popup outside the visual tree; its item
                  reads both the command and the tile through PlacementTarget. -->
@@ -60,7 +60,7 @@
             <Setter Property="ContextMenu">
                 <Setter.Value>
                     <ContextMenu>
-                        <MenuItem Header="删除预设"
+                        <MenuItem Header="Delete Preset"
                                   Command="{Binding PlacementTarget.Tag,
                                             RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding PlacementTarget.DataContext,
@@ -118,7 +118,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Left: presets. Create mode shows category tabs over the card grid (最近
+                <!-- Left: presets. Create mode shows category tabs over the card grid (Recent
                      lists recently confirmed presets, the other tabs one per family); project
                      settings keep the family fixed and list only that family's presets. -->
                 <Grid Grid.Column="0">
@@ -142,10 +142,10 @@
                     </ListBox>
                     <StackPanel Grid.Row="0" Margin="0,0,0,6"
                                 Visibility="{Binding EditModeVisibility}">
-                        <TextBlock Style="{StaticResource FieldLabel}" Text="换用预设" />
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="Switch Preset" />
                         <TextBlock Style="{StaticResource CompactHint}" Margin="0,4,0,0"
                                    TextWrapping="Wrap"
-                                   Text="选择其他预设会用它的几何参数覆盖当前参数，切换前会先确认。" />
+                                   Text="Selecting another preset will overwrite the current geometry parameters with its own. You will be prompted to confirm before switching." />
                     </StackPanel>
                     <ListBox Grid.Row="1" ItemsSource="{Binding VisibleTemplates}"
                              SelectedItem="{Binding SelectedTemplate}"
@@ -171,7 +171,7 @@
                                                 Padding="4,1" CornerRadius="{StaticResource RadiusChip}"
                                                 Background="{DynamicResource Surface3Brush}"
                                                 Visibility="{Binding UserBadgeVisibility}">
-                                            <TextBlock Text="自定" Style="{StaticResource MicroText}" />
+                                            <TextBlock Text="Custom" Style="{StaticResource MicroText}" />
                                         </Border>
                                     </Grid>
                                     <!-- Preset names can outrun the card: the line scrolls
@@ -197,7 +197,7 @@
                 <Border Grid.Column="1" Width="24" />
 
                 <!-- Right: preset details. The project name and save location belong here too —
-                     the pane is the one place that defines what will be created. -->
+                    the pane is the one place that defines what will be created. -->
                 <Border Grid.Column="2" Width="312"
                         Style="{StaticResource CardStyle}" Padding="18">
                     <!-- Save location is pinned to the bottom of the pane: it names the file
@@ -210,48 +210,48 @@
                         </Grid.RowDefinitions>
                         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <TextBlock Text="预设详细信息" Style="{StaticResource PanelTitle}"
+                                <TextBlock Text="Preset Details" Style="{StaticResource PanelTitle}"
                                            Margin="0,0,0,14" />
-                                <TextBlock Style="{StaticResource FieldLabel}" Text="工程名" />
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Project Name" />
                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                                          MaxLength="80" />
                                 <WrapPanel Margin="0,16,0,0" VerticalAlignment="Top">
                                     <StackPanel Width="116" Margin="0,0,12,14">
-                                        <TextBlock Style="{StaticResource FieldLabel}" Text="内半径 r0 (mm)" />
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Inner Radius r0 (mm)" />
                                         <TextBox Text="{Binding InnerRadiusText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                                     <StackPanel Width="116" Margin="0,0,12,14">
-                                        <TextBlock Style="{StaticResource FieldLabel}" Text="外半径 r1 (mm)" />
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Outer Radius r1 (mm)" />
                                         <TextBox Text="{Binding OuterRadiusText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                                     <StackPanel Width="116" Margin="0,0,12,14">
-                                        <TextBlock Style="{StaticResource FieldLabel}" Text="扇区数" />
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Sectors" />
                                         <TextBox Text="{Binding SectorsText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                                     <StackPanel Width="124" Margin="0,0,16,14"
                                                 Visibility="{Binding IsDvdFieldsVisibility}">
-                                        <TextBlock Style="{StaticResource FieldLabel}" Text="相对一次项" />
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Linear Term" />
                                         <TextBox Text="{Binding PitchLinearText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                                     <StackPanel Width="124" Margin="0,0,16,14"
                                                 Visibility="{Binding IsDvdFieldsVisibility}">
-                                        <TextBlock Style="{StaticResource FieldLabel}" Text="相对二次项" />
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Quadratic Term" />
                                         <TextBox Text="{Binding PitchQuadraticText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                                     <StackPanel Width="124" Margin="0,0,0,14"
                                                 Visibility="{Binding IsDvdFieldsVisibility}">
-                                        <TextBlock Style="{StaticResource FieldLabel}" Text="相对三次项" />
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Cubic Term" />
                                         <TextBox Text="{Binding PitchCubicText, UpdateSourceTrigger=PropertyChanged}" />
                                     </StackPanel>
                                     <TextBlock Style="{StaticResource CompactHint}"
                                                Margin="0,0,0,14" TextWrapping="Wrap"
                                                Visibility="{Binding IsBluRayFieldsVisibility}"
-                                               Text="单层 BD-R：扇区数须为 32 的倍数，使用恒定轨距与 0° 起始角。" />
+                                               Text="Single-Layer BD-R: Sector count must be a multiple of 32, with constant track pitch and 0° starting angle." />
                                 </WrapPanel>
                                 <StackPanel Margin="0,0,0,4"
                                             Visibility="{Binding EditModeVisibility}">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                        <TextBlock Text="盘型" Style="{StaticResource FieldLabel}"
+                                        <TextBlock Text="Disc Type" Style="{StaticResource FieldLabel}"
                                                    VerticalAlignment="Center" Margin="0,0,8,0" />
                                         <Border Padding="6,2" CornerRadius="{StaticResource RadiusChip}"
                                                 Background="{DynamicResource Surface3Brush}"
@@ -261,7 +261,7 @@
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Style="{StaticResource CompactButton}"
-                                                Content="将此套参数保存为预设"
+                                                Content="Save Parameters as Preset"
                                                 Command="{Binding SaveAsPresetCommand}" />
                                         <TextBlock Text="{Binding SavedPresetMessage}"
                                                    Style="{StaticResource HintText}" VerticalAlignment="Center"
@@ -275,14 +275,14 @@
                             </StackPanel>
                         </ScrollViewer>
                         <StackPanel Grid.Row="1" Margin="0,14,0,0">
-                            <TextBlock Style="{StaticResource FieldLabel}" Margin="0,0,0,6" Text="保存位置" />
+                            <TextBlock Style="{StaticResource FieldLabel}" Margin="0,0,0,6" Text="Save Location" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBox Text="{Binding SaveDirectory, UpdateSourceTrigger=PropertyChanged}" />
-                                <Button Grid.Column="1" Style="{StaticResource BrowseButton}" Content="浏览…"
+                                <Button Grid.Column="1" Style="{StaticResource BrowseButton}" Content="Browse…"
                                         Command="{Binding BrowseSavePathCommand}" />
                             </Grid>
                             <TextBlock Style="{StaticResource HintText}" Margin="0,8,0,0"
@@ -300,7 +300,7 @@
                     <ColumnDefinition Width="10" />
                     <ColumnDefinition Width="Auto" SharedSizeGroup="DialogAction" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Style="{StaticResource SecondaryButton}" Content="取消"
+                <Button Grid.Column="0" Style="{StaticResource SecondaryButton}" Content="Cancel"
                         Click="Cancel_Click" />
                 <Button Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="{Binding ConfirmLabel}"
                         Command="{Binding ConfirmCommand}" />

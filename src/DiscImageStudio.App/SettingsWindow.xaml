@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:DiscImageStudio.Controls"
-        Title="设置"
+        Title="Settings"
         Width="760" Height="600"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None" ResizeMode="NoResize"
@@ -21,7 +21,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <controls:TitleBar Grid.Row="0" ProjectTitle="设置"
+        <controls:TitleBar Grid.Row="0" ProjectTitle="Settings"
                            ShowMinimizeButton="False" ShowMaximizeButton="False" />
 
         <Grid Grid.Row="1">
@@ -33,10 +33,10 @@
             <Border Grid.Column="0" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,1,0"
                     Padding="16,12">
                 <StackPanel>
-                    <controls:SideNavItem x:Name="GeneralNav" LabelText="通用"
+                    <controls:SideNavItem x:Name="GeneralNav" LabelText="General"
                                           IconKind="SlidersHorizontal" IsActive="True"
                                           Activated="GeneralNav_Activated" />
-                    <controls:SideNavItem x:Name="StorageNav" LabelText="存储"
+                    <controls:SideNavItem x:Name="StorageNav" LabelText="Storage"
                                           IconKind="HardDrive" Activated="StorageNav_Activated" />
                 </StackPanel>
             </Border>
@@ -45,31 +45,31 @@
                           HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="24,16,24,24">
                     <StackPanel x:Name="GeneralPanel">
-                        <TextBlock Text="通用" Style="{StaticResource H1Title}" />
-                        <TextBlock Text="界面外观偏好。" Style="{StaticResource PageSubtitle}" Margin="0,4,0,0" />
+                        <TextBlock Text="General" Style="{StaticResource H1Title}" />
+                        <TextBlock Text="Interface appearance preferences." Style="{StaticResource PageSubtitle}" Margin="0,4,0,0" />
 
-                        <controls:SectionCard Header="外观" IconKind="Palette" Margin="0,20,0,0">
+                        <controls:SectionCard Header="Appearance" IconKind="Palette" Margin="0,20,0,0">
                             <StackPanel>
-                                <TextBlock Text="主题" Style="{StaticResource FieldLabel}" />
-                                <controls:SegmentedControl LabelA="深色" LabelB="浅色" LabelC="跟随系统"
+                                <TextBlock Text="Theme" Style="{StaticResource FieldLabel}" />
+                                <controls:SegmentedControl LabelA="Dark" LabelB="Light" LabelC="System"
                                                            SelectedIndex="{Binding ThemeIndex, Mode=TwoWay}" />
-                                <TextBlock Text="保存后立即应用到所有窗口。"
+                                <TextBlock Text="Applied to all windows immediately after saving."
                                            Style="{StaticResource CompactHint}" Margin="0,8,0,0" />
                             </StackPanel>
                         </controls:SectionCard>
                     </StackPanel>
 
                     <StackPanel x:Name="StoragePanel" Visibility="Collapsed">
-                        <TextBlock Text="存储" Style="{StaticResource H1Title}" />
-                        <TextBlock Text="新建工程与临时缓存的默认位置。"
+                        <TextBlock Text="Storage" Style="{StaticResource H1Title}" />
+                        <TextBlock Text="Default locations for new projects and temporary cache."
                                    Style="{StaticResource PageSubtitle}" Margin="0,4,0,0" />
 
-                        <controls:SectionCard Header="位置" IconKind="FolderCog" Margin="0,20,0,0">
+                        <controls:SectionCard Header="Locations" IconKind="FolderCog" Margin="0,20,0,0">
                             <StackPanel>
                                 <Grid Margin="0,0,0,6">
-                                    <TextBlock Text="默认工程位置" Style="{StaticResource FieldLabel}"
+                                    <TextBlock Text="Default Project Location" Style="{StaticResource FieldLabel}"
                                                Margin="0" VerticalAlignment="Center" />
-                                    <Button Content="恢复默认" Style="{StaticResource QuietButton}"
+                                    <Button Content="Restore Default" Style="{StaticResource QuietButton}"
                                             HorizontalAlignment="Right" Height="24" Padding="8,0" FontSize="12"
                                             Command="{Binding ResetDefaultProjectDirectoryCommand}" />
                                 </Grid>
@@ -77,12 +77,12 @@
                                     Text="{Binding DefaultProjectDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     Placeholder="{Binding DefaultProjectDirectoryPlaceholder}"
                                     Command="{Binding BrowseDefaultProjectDirectoryCommand}"
-                                    Hint="仅作为新建工程对话框的默认位置；留空使用系统文档目录。" />
+                                    Hint="Used as the default path for the New Project dialog; leave empty to use Documents." />
 
                                 <Grid Margin="0,18,0,6">
-                                    <TextBlock Text="缓存位置" Style="{StaticResource FieldLabel}"
+                                    <TextBlock Text="Cache Location" Style="{StaticResource FieldLabel}"
                                                Margin="0" VerticalAlignment="Center" />
-                                    <Button Content="恢复默认" Style="{StaticResource QuietButton}"
+                                    <Button Content="Restore Default" Style="{StaticResource QuietButton}"
                                             HorizontalAlignment="Right" Height="24" Padding="8,0" FontSize="12"
                                             Command="{Binding ResetCacheDirectoryCommand}" />
                                 </Grid>
@@ -90,11 +90,11 @@
                                     Text="{Binding CacheDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     Placeholder="{Binding DefaultCacheDirectoryPlaceholder}"
                                     Command="{Binding BrowseCacheDirectoryCommand}"
-                                    Hint="用于设计合成图、预览渲染与缩略图；留空使用系统临时目录，切换后新任务使用新位置，旧缓存不会自动迁移。" />
+                                    Hint="Used for composited graphics, preview renders, and thumbnails; leave empty to use system temp. New tasks will use the new path; existing cache is not migrated automatically." />
                             </StackPanel>
                         </controls:SectionCard>
 
-                        <controls:SectionCard Header="缓存" IconKind="Database" Margin="0,16,0,0">
+                        <controls:SectionCard Header="Cache" IconKind="Database" Margin="0,16,0,0">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding CacheUsageText}" Style="{StaticResource RowText}" />
@@ -104,9 +104,9 @@
                                 <TextBlock Text="{Binding CacheMessage}" Style="{StaticResource CompactHint}"
                                            Margin="0,6,0,0" />
                                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                    <Button Content="清空缓存" Style="{StaticResource CompactButton}"
+                                    <Button Content="Clear Cache" Style="{StaticResource CompactButton}"
                                             Command="{Binding ClearCacheCommand}" />
-                                    <Button Content="打开应用数据目录" Style="{StaticResource CompactButton}"
+                                    <Button Content="Open App Data Directory" Style="{StaticResource CompactButton}"
                                             Margin="8,0,0,0" Command="{Binding OpenAppDataDirectoryCommand}" />
                                 </StackPanel>
                             </StackPanel>
@@ -128,9 +128,9 @@
                 <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource CompactText}"
                            Foreground="{DynamicResource DangerBrush}"
                            VerticalAlignment="Center" Margin="0,0,16,0" TextWrapping="Wrap" />
-                <Button Grid.Column="1" Content="取消" Style="{StaticResource SecondaryButton}"
+                <Button Grid.Column="1" Content="Cancel" Style="{StaticResource SecondaryButton}"
                         MinWidth="88" Click="Cancel_Click" />
-                <Button Grid.Column="3" Content="保存" Style="{StaticResource PrimaryButton}"
+                <Button Grid.Column="3" Content="Save" Style="{StaticResource PrimaryButton}"
                         MinWidth="88" Click="Save_Click" />
             </Grid>
         </Border>

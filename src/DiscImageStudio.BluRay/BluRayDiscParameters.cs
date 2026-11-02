@@ -53,13 +53,13 @@ public sealed record BluRayDiscPreset(string Id, string DisplayName, int LayerCo
         && !BuiltIn.Any(preset => preset.Id.Equals(Id, StringComparison.OrdinalIgnoreCase));
     public BluRayDiscParameters CreateParameters() => Geometry ?? new(TotalSectors, LayerCount);
 
-    public static BluRayDiscPreset Manual { get; } = new("__manual__", "自定义参数（未保存）", 1, IsCustom: true);
+    public static BluRayDiscPreset Manual { get; } = new("__manual__", "Custom Parameters (Unsaved)", 1, IsCustom: true);
 
     public static IReadOnlyList<BluRayDiscPreset> BuiltIn { get; } = Array.AsReadOnly(
         new BluRayDiscPreset[]
         {
-            new("bd-r-sl-25gb", "BD-R 单层 25 GB", 1),
-            new("bd-r-ritek-10x", "铼德 BD-R 10x", 1,
+            new("bd-r-sl-25gb", "BD-R Single-Layer 25 GB", 1),
+            new("bd-r-ritek-10x", "Ritek BD-R 10x", 1,
                 new(12_219_392, 1, 23.98822105616562, 58.023234731100764, 0), InvertMapping: false),
             new("bd-r-verbatim-64099", "Verbatim BD-R (64099)", 1,
                 new(12_219_392, 1, 23.987042157339335, 57.987960341783236, 0), InvertMapping: false),

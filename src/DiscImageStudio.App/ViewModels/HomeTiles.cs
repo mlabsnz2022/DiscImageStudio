@@ -19,8 +19,8 @@ public sealed record HomeTemplateTile(
 {
     public static HomeTemplateTile Blank { get; } = new(
         null,
-        "空白工程",
-        "从默认参数开始",
+        "Blank Project",
+        "Start with default parameters",
         PackIconLucideKind.SquarePen,
         OpticalDiscFamily.CompactDisc,
         IsBlank: true);
@@ -63,10 +63,10 @@ public sealed class RecentProjectTile
 
     public string LocationText => _projectExists
         ? Path.GetDirectoryName(Entry.ProjectPath) ?? Entry.ProjectPath
-        : "工程文件已移动或删除";
+        : "Project file moved or deleted";
 
     public string ToolTipText
-        => $"{Entry.ProjectPath}\n最近打开：{Entry.LastOpenedUtc.ToLocalTime():yyyy-MM-dd HH:mm}";
+        => $"{Entry.ProjectPath}\nLast opened: {Entry.LastOpenedUtc.ToLocalTime():yyyy-MM-dd HH:mm}";
 
     internal static RecentProjectTile Create(RecentProjectEntry entry)
     {

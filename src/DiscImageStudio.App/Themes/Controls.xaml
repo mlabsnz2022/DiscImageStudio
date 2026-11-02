@@ -1232,8 +1232,8 @@
         </Setter>
     </Style>
 
-    <!-- StepCard: numbered workflow step with a state chip (待开始 muted / 进行中 primary /
-         已完成 success + check) and a collapsible body. Header chrome matches SectionCard so
+    <!-- StepCard: numbered workflow step with a state chip (Pending muted / In Progress primary /
+         Completed success + check) and a collapsible body. Header chrome matches SectionCard so
          a step column reads as the same design language as the cards beside it. The state
          triggers live inside the header template: they color parts (dot, number, chip) that
          only exist there. -->
@@ -1283,7 +1283,7 @@
                                                         Background="{DynamicResource Surface3Brush}" VerticalAlignment="Center"
                                                         Margin="10,0,0,0">
                                                     <TextBlock x:Name="StateChipText" Style="{StaticResource MicroText}"
-                                                               Text="待开始" />
+                                                               Text="Pending" />
                                                 </Border>
                                                 <iconPacks:PackIconLucide Grid.Column="3" x:Name="HeaderChevron" Kind="ChevronDown"
                                                                           Width="16" Height="16" Margin="10,0,0,0" VerticalAlignment="Center"
@@ -1307,7 +1307,7 @@
                                                          Value="Active">
                                                 <Setter TargetName="StepDot" Property="Background" Value="{DynamicResource PrimaryBrush}" />
                                                 <Setter TargetName="StepNumberText" Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-                                                <Setter TargetName="StateChipText" Property="Text" Value="进行中" />
+                                                <Setter TargetName="StateChipText" Property="Text" Value="In Progress" />
                                                 <Setter TargetName="StateChipText" Property="Foreground" Value="{DynamicResource PrimaryHoverBrush}" />
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding State, RelativeSource={RelativeSource AncestorType={x:Type controls:StepCard}}}"
@@ -1315,7 +1315,7 @@
                                                 <Setter TargetName="StepDot" Property="Background" Value="{DynamicResource SuccessSoftBrush}" />
                                                 <Setter TargetName="StepNumberText" Property="Visibility" Value="Collapsed" />
                                                 <Setter TargetName="DoneCheck" Property="Visibility" Value="Visible" />
-                                                <Setter TargetName="StateChipText" Property="Text" Value="已完成" />
+                                                <Setter TargetName="StateChipText" Property="Text" Value="Completed" />
                                                 <Setter TargetName="StateChipText" Property="Foreground" Value="{DynamicResource SuccessBrush}" />
                                             </DataTrigger>
                                         </ControlTemplate.Triggers>

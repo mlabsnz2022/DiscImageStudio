@@ -17,11 +17,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Grid.Row="0" Title="预览" Badge="{Binding DiscFamilyLabel}"
+        <controls:PageHeader Grid.Row="0" Title="Preview" Badge="{Binding DiscFamilyLabel}"
                              Workspace="{x:Static vm:Workspace.Preview}"
-                             Hint="“设计投影”按工程参数将源图投到盘面上，速度快；“成品读回”则读取已生成的镜像文件还原。生成几何参数请在工程设置中修改。">
+                             Hint="&quot;Design Projection&quot; projects the source image onto the disc using project parameters quickly; &quot;Image Readback&quot; restores from an exported disc image. Geometric parameters can be edited in Project Settings.">
             <controls:PageHeader.Actions>
-                <Button Style="{StaticResource CompactButton}" Content="下一步：导出"
+                <Button Style="{StaticResource CompactButton}" Content="Next: Export"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static vm:Workspace.Export}" />
             </controls:PageHeader.Actions>
@@ -45,7 +45,7 @@
                 <StackPanel Grid.Row="0" Margin="0,0,0,16">
                     <!-- The input switch governs the parameter panel below it. -->
                     <controls:SegmentedControl HorizontalAlignment="Stretch"
-                                               LabelA="设计投影" LabelB="成品读回"
+                                               LabelA="Design Projection" LabelB="Image Readback"
                                                IsSecondSelected="{Binding IsReadbackPreview}" />
                 </StackPanel>
 
@@ -62,17 +62,17 @@
                                 <!-- Design projection: the source is the design page's composite. -->
                                 <controls:VisibilityGate IsOpen="{Binding IsCalibrationPreview}">
                                     <StackPanel>
-                                        <TextBlock Text="源图片" Style="{StaticResource PanelTitle}"
+                                        <TextBlock Text="Source Image" Style="{StaticResource PanelTitle}"
                                                    Margin="0,0,0,10" />
                                         <controls:SourceChip Margin="0,0,0,12" />
-                                        <controls:GeometrySummary Title="当前工程参数"
+                                        <controls:GeometrySummary Title="Project Parameters"
                                             EditCommand="{Binding EditGeometryCommand}"
                                             Margin="0,0,0,16" />
 
                                         <!-- Expert rows: the projection works without them (the
                                              measured set falls back to the generated geometry), so
                                              they stay folded until someone is comparing. -->
-                                        <Expander Header="实测参数与预览精度（高级）" IsExpanded="False">
+                                        <Expander Header="Calibration &amp; Precision (Advanced)" IsExpanded="False">
                                             <StackPanel Margin="0,4,0,0">
                                                 <Grid Margin="0,0,0,12">
                                                     <Grid.ColumnDefinitions>
@@ -81,12 +81,12 @@
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Grid.Column="0">
-                                                        <TextBlock Style="{StaticResource FieldLabel}" Text="内半径 (mm)" />
+                                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Inner Radius (mm)" />
                                                         <TextBox Style="{StaticResource CompactTextBox}"
                                                                  Text="{Binding Inspector.MeasuredInnerRadius, UpdateSourceTrigger=PropertyChanged}" />
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="2">
-                                                        <TextBlock Style="{StaticResource FieldLabel}" Text="外半径 (mm)" />
+                                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Outer Radius (mm)" />
                                                         <TextBox Style="{StaticResource CompactTextBox}"
                                                                  Text="{Binding Inspector.MeasuredOuterRadius, UpdateSourceTrigger=PropertyChanged}" />
                                                     </StackPanel>
@@ -104,17 +104,17 @@
                                                                 <ColumnDefinition Width="*" />
                                                             </Grid.ColumnDefinitions>
                                                             <StackPanel Grid.Column="0">
-                                                                <TextBlock Style="{StaticResource FieldLabel}" Text="相对一次项" />
+                                                                <TextBlock Style="{StaticResource FieldLabel}" Text="Linear Term" />
                                                                 <TextBox Style="{StaticResource CompactTextBox}"
                                                                          Text="{Binding Inspector.MeasuredPitchLinear, UpdateSourceTrigger=PropertyChanged}" />
                                                             </StackPanel>
                                                             <StackPanel Grid.Column="2">
-                                                                <TextBlock Style="{StaticResource FieldLabel}" Text="相对二次项" />
+                                                                <TextBlock Style="{StaticResource FieldLabel}" Text="Quadratic Term" />
                                                                 <TextBox Style="{StaticResource CompactTextBox}"
                                                                          Text="{Binding Inspector.MeasuredPitchQuadratic, UpdateSourceTrigger=PropertyChanged}" />
                                                             </StackPanel>
                                                             <StackPanel Grid.Column="4">
-                                                                <TextBlock Style="{StaticResource FieldLabel}" Text="相对三次项" />
+                                                                <TextBlock Style="{StaticResource FieldLabel}" Text="Cubic Term" />
                                                                 <TextBox Style="{StaticResource CompactTextBox}"
                                                                          Text="{Binding Inspector.MeasuredPitchCubic, UpdateSourceTrigger=PropertyChanged}" />
                                                             </StackPanel>
@@ -124,7 +124,7 @@
                                                     </StackPanel>
                                                 </controls:VisibilityGate>
 
-                                                <TextBlock Text="预览精度" Style="{StaticResource PanelTitle}" />
+                                                <TextBlock Text="Preview Resolution" Style="{StaticResource PanelTitle}" />
                                                 <Grid Margin="0,0,0,4">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
@@ -132,21 +132,21 @@
                                                         <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Grid.Column="0">
-                                                        <TextBlock Style="{StaticResource FieldLabel}" Text="导出尺寸 (px)" />
+                                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Export Size (px)" />
                                                         <TextBox Style="{StaticResource CompactTextBox}"
                                                                  Text="{Binding Inspector.PreviewSize, UpdateSourceTrigger=PropertyChanged}" />
                                                     </StackPanel>
                                                     <controls:VisibilityGate Grid.Column="2"
                                                         IsOpen="{Binding Inspector.HasSamplesPerSector}">
                                                         <StackPanel>
-                                                            <TextBlock Style="{StaticResource FieldLabel}" Text="每扇区采样" />
+                                                            <TextBlock Style="{StaticResource FieldLabel}" Text="Samples per Sector" />
                                                             <TextBox Style="{StaticResource CompactTextBox}"
                                                                      Text="{Binding Inspector.SamplesPerSector, UpdateSourceTrigger=PropertyChanged}" />
                                                         </StackPanel>
                                                     </controls:VisibilityGate>
                                                 </Grid>
                                                 <TextBlock Style="{StaticResource HintText}" Margin="0,0,0,8"
-                                                           Text="尺寸越大投影越细，刷新越慢。" />
+                                                           Text="Larger dimensions produce finer projections, but refresh slower." />
                                             </StackPanel>
                                         </Expander>
                                     </StackPanel>
@@ -160,10 +160,10 @@
                                                    Margin="0,0,0,10" />
                                         <controls:PathField Margin="0,0,0,12" Compact="True"
                                                             Text="{Binding Inspector.ArtifactPath}"
-                                                            ButtonLabel="浏览…"
+                                                            ButtonLabel="Browse…"
                                                             Hint="{Binding Inspector.ArtifactHint}"
                                                             Command="{Binding Inspector.BrowseArtifactCommand}" />
-                                        <controls:GeometrySummary Title="当前工程参数"
+                                        <controls:GeometrySummary Title="Project Parameters"
                                             EditCommand="{Binding EditGeometryCommand}" />
 
                                         <!-- Generated tracks carry their interleave in the sidecar
@@ -171,9 +171,9 @@
                                              track (another tool, an old build) has none, so the
                                              read-back needs the user to declare it here. -->
                                         <controls:VisibilityGate IsOpen="{Binding Inspector.IsCdAudioArtifact}">
-                                            <controls:InterleaveToggle Label="逆交织"
+                                            <controls:InterleaveToggle Label="De-interleave"
                                                                        IsChecked="{Binding Inspector.State.CdInterleave}"
-                                                                       Hint="若音轨生成时启用了延迟交织，则应勾选该选项。"
+                                                                       Hint="Check this option if delay interleaving was enabled when generating the audio track."
                                                                        Margin="0,12,0,0" />
                                         </controls:VisibilityGate>
                                     </StackPanel>
@@ -182,7 +182,7 @@
                             </StackPanel>
                         </ScrollViewer>
                         <Border Grid.Row="1" Style="{StaticResource CardFooterBandStyle}">
-                            <Button Style="{StaticResource CompactButton}" Content="刷新预览"
+                            <Button Style="{StaticResource CompactButton}" Content="Refresh Preview"
                                     Command="{Binding RefreshCommand}" Margin="18,0"
                                     HorizontalAlignment="Stretch" />
                         </Border>
@@ -200,9 +200,9 @@
                 <controls:MonitorCard.Actions>
                     <Button Style="{StaticResource IconButton}"
                             Command="{Binding DownloadPreviewCommand}"
-                            AutomationProperties.Name="导出预览"
+                            AutomationProperties.Name="Export Preview"
                             ToolTipService.InitialShowDelay="150"
-                            ToolTip="导出当前预览图到输入来源所在文件夹">
+                            ToolTip="Export current preview image to the source folder">
                         <iconPacks:PackIconLucide Kind="Download" Width="16" Height="16" />
                     </Button>
                 </controls:MonitorCard.Actions>
@@ -245,7 +245,7 @@
                         <StackPanel Orientation="Horizontal" Margin="18,0,18,14">
                             <Rectangle Width="12" Height="12" Fill="#FACC15" RadiusX="2" RadiusY="2" Margin="0,0,8,0" />
                             <TextBlock Foreground="{DynamicResource TextSecondaryBrush}"
-                                       Text="黄色：文件区（含文件系统）" />
+                                       Text="Yellow: File region (including file system)" />
                         </StackPanel>
                     </controls:VisibilityGate>
                 </Grid>

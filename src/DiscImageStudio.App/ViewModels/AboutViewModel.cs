@@ -25,6 +25,6 @@ public class AboutViewModel
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
         string? version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-        return $"版本 {version?.Split('+')[0] ?? assembly.GetName().Version?.ToString(3) ?? "1.0.0"}";
+        return $"Version {version?.Split('+')[0] ?? assembly.GetName().Version?.ToString(3) ?? "1.0.0"}";
     }
 }

@@ -5,7 +5,7 @@ namespace DiscImageStudio.Controls;
 
 /// <summary>
 /// WrapPanel that centers every row. The stock WrapPanel left-aligns each row, so a partly
-/// filled row — the lone fifth "快速创建" tile once the window is narrow — hangs off the left
+/// filled row — the lone fifth "Quick Create" tile once the window is narrow — hangs off the left
 /// edge of a grid whose other rows are full.
 /// </summary>
 public class CenteringWrapPanel : Panel

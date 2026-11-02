@@ -39,7 +39,7 @@ public partial class PageHeader : UserControl
         nameof(Current), typeof(Workspace), typeof(PageHeader),
         new PropertyMetadata(Workspace.Home, static (sender, args) => ((PageHeader)sender).Stages.Current = (Workspace)args.NewValue));
 
-    /// <summary>Right-aligned action slot: typically the "下一步" button that moves the user to
+    /// <summary>Right-aligned action slot: typically the "Next" button that moves the user to
     /// the next workspace.</summary>
     public static readonly DependencyProperty ActionsProperty = DependencyProperty.Register(
         nameof(Actions), typeof(object), typeof(PageHeader),

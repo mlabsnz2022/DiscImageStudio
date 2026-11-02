@@ -44,7 +44,7 @@ internal static class Program
 
             string output = Path.GetFullPath(Required(options, "--output"));
             ValidateOutputPath(input, output);
-            if (File.Exists(output)) throw new IOException("输出文件已存在，请选择另一个文件名。");
+            if (File.Exists(output)) throw new IOException("Output file already exists, please choose a different filename.");
             BitmapSource source = DitherProcessor.LoadImage(input);
             BitmapSource result = DitherProcessor.Process(source, DitherModes.Levels(mode), linearizeSrgb: linearizeSrgb);
             DitherProcessor.SavePng(result, output, DitherModes.Levels(mode));
@@ -62,9 +62,9 @@ internal static class Program
     internal static void ValidateOutputPath(string input, string output)
     {
         if (Path.GetFullPath(input).Equals(Path.GetFullPath(output), StringComparison.OrdinalIgnoreCase))
-            throw new ArgumentException("请另存为新文件，不能覆盖原图。");
+            throw new ArgumentException("Please save as a new file; do not overwrite the original image.");
         if (!Path.GetExtension(output).Equals(".png", StringComparison.OrdinalIgnoreCase))
-            throw new ArgumentException("请保存为 PNG，以保留准确的灰阶。");
+            throw new ArgumentException("Please save as PNG to preserve exact grayscale levels.");
     }
 
     private static Dictionary<string, string> ParseOptions(string[] args)
@@ -74,7 +74,7 @@ internal static class Program
         {
             if (index + 1 >= args.Length || args[index] is not ("--input" or "--output" or "--snapshot" or "--mode" or "--gamma")
                 || !options.TryAdd(args[index], args[index + 1]))
-                throw new ArgumentException("用法：FourLevelDither --input 原图 --output 结果.png [--mode dvd|cd] [--gamma none|srgb]");
+                throw new ArgumentException("Usage: FourLevelDither --input source --output result.png [--mode dvd|cd] [--gamma none|srgb]");
         }
         return options;
     }
@@ -87,7 +87,7 @@ internal static class Program
     {
         "none" => false,
         "srgb" => true,
-        _ => throw new ArgumentException("--gamma 请选择 none（关闭）或 srgb（sRGB 伽马校正）。"),
+        _ => throw new ArgumentException("--gamma must be none (disabled) or srgb (sRGB gamma correction)."),
     };
 
     // Off-screen rendering exercises the same window and asynchronous processing used interactively.

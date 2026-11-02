@@ -57,21 +57,21 @@ public sealed record CalibrationParameters(
             || TrackLengthMm <= OuterRadiusMm - InnerRadiusMm
             || !double.IsFinite(OuterRadiusMm * OuterRadiusMm)
             || !double.IsFinite(2 * TrackLengthMm / (OuterRadiusMm * OuterRadiusMm - InnerRadiusMm * InnerRadiusMm)))
-            throw new ArgumentException("标定参数无效：请检查盘片类型、内外半径、扇区数和线速度／位长。");
+            throw new ArgumentException("Invalid calibration parameters: check disc type, radii, sectors, and linear velocity/bit length.");
         DvdTrackGeometry.ValidatePitchCoefficients(PitchLinear, PitchQuadratic, PitchCubic);
         if (Kind != CalibrationDiscKind.Dvd && (PitchLinear != 0 || PitchQuadratic != 0 || PitchCubic != 0))
-            throw new ArgumentException("三次轨距参数仅适用于 DVD。");
+            throw new ArgumentException("Cubic track pitch parameters only apply to DVD.");
         if (DrawingStartSector < 0 || DrawingStartSector >= Sectors
             || DrawingEndSectorExclusive < 0 || DrawingEndSectorExclusive > Sectors
             || (DrawingEndSectorExclusive != 0 && DrawingEndSectorExclusive <= DrawingStartSector)
             || (Kind != CalibrationDiscKind.BluRay && (DrawingStartSector != 0 || DrawingEndSectorExclusive != 0
                 || BluRayInvertMapping || BluRayIsoTimestamp is not null)))
-            throw new ArgumentException("标定图案的可绘制扇区范围无效。");
+            throw new ArgumentException("Invalid drawable sector range for calibration pattern.");
         if (Kind == CalibrationDiscKind.BluRay && (Sectors > uint.MaxValue
             || Sectors % BluRaySectorsPerCluster != 0 || DrawingStartSector % BluRaySectorsPerCluster != 0
             || DrawingEndSectorExclusive % BluRaySectorsPerCluster != 0
             || LinearDensity != BluRayChannelBitLengthNm || OuterRadiusMm > 60))
-            throw new ArgumentException("蓝光标定需要完整的 32 扇区簇、74.5 nm 位长和不超过 60 mm 的外半径。");
+            throw new ArgumentException("Blu-ray calibration requires complete 32-sector clusters, 74.5 nm bit length, and outer radius <= 60 mm.");
     }
 }
 
@@ -87,7 +87,7 @@ public sealed record CalibrationPatternOptions(
             || SmallCellMm < 0.25 || MediumCellMm <= SmallCellMm
             || LargeCellMm <= MediumCellMm || LargeCellMm > 100
             || SectorGapMm <= 0 || SectorGapMm > 10)
-            throw new ArgumentException("标定记录中的兼容图案选项无效，请重新创建标定图案。");
+            throw new ArgumentException("Invalid compatible pattern option in calibration record; recreate calibration pattern.");
     }
 }
 
@@ -250,14 +250,14 @@ public sealed class CalibrationTarget
     {
         if (string.IsNullOrWhiteSpace(cellId)
             || !_controlPointByReference.TryGetValue((cellId, cornerIndex), out CalibrationControlPoint? point))
-            throw new ArgumentException("控制块或控制点编号无效。");
+            throw new ArgumentException("Invalid control block or point index.");
         return point;
     }
 
     public CalibrationGroupRole GetGroupRole(string cellId)
     {
         if (string.IsNullOrWhiteSpace(cellId) || !_byId.TryGetValue(cellId, out CalibrationCell? cell))
-            throw new ArgumentException("控制块编号无效。");
+            throw new ArgumentException("Invalid control block index.");
         return Groups.First(group => group.Id == cell.GroupId).Role;
     }
 
@@ -274,25 +274,25 @@ public sealed class CalibrationTarget
     public void Validate()
     {
         if (SchemaVersion != CurrentSchemaVersion)
-            throw new ArgumentException($"不支持的标定会话版本 {SchemaVersion}。");
-        if (!Guid.TryParseExact(Id, "N", out _)) throw new ArgumentException("标定图案 ID 无效。");
+            throw new ArgumentException($"Unsupported calibration session schemaVersion {SchemaVersion}.");
+        if (!Guid.TryParseExact(Id, "N", out _)) throw new ArgumentException("Invalid calibration pattern ID.");
         Parameters.Validate();
         Options.Validate();
         if (Cells.Count > 20_000 || Cells.Any(cell => cell is null))
-            throw new ArgumentException("标定图案控制块数量无效。");
+            throw new ArgumentException("Invalid calibration pattern block count.");
         if (Cells.Select(cell => cell.Id).Distinct(StringComparer.Ordinal).Count() != Cells.Count)
-            throw new ArgumentException("标定图案含重复控制块 ID。");
+            throw new ArgumentException("Calibration pattern contains duplicate block IDs.");
         // Persist the actual control geometry; reject altered or incompatible definitions.
         CalibrationCell[] expected = BuildCells(Parameters);
         if (!Cells.SequenceEqual(expected))
-            throw new ArgumentException("标定图案与生成参数或图案规则不一致。");
+            throw new ArgumentException("Calibration pattern inconsistent with generation parameters or rules.");
     }
 
     public CalibrationPoint GetCorner(string cellId, int cornerIndex)
     {
         if (string.IsNullOrWhiteSpace(cellId) || !_byId.TryGetValue(cellId, out CalibrationCell? cell)
             || cornerIndex < 0 || cornerIndex >= cell.Corners.Count)
-            throw new ArgumentException("控制块或角点编号无效。");
+            throw new ArgumentException("Invalid control block or corner index.");
         return cell.Corners[cornerIndex];
     }
 
@@ -301,7 +301,7 @@ public sealed class CalibrationTarget
     {
         if (samplesPerEdge is < 1 or > 2048) throw new ArgumentOutOfRangeException(nameof(samplesPerEdge));
         if (string.IsNullOrWhiteSpace(cellId) || !_byId.TryGetValue(cellId, out CalibrationCell? cell))
-            throw new ArgumentException("控制块编号无效。");
+            throw new ArgumentException("Invalid control block index.");
         return SampleBoundary(CellBoundary(cell), samplesPerEdge);
     }
 
@@ -309,7 +309,7 @@ public sealed class CalibrationTarget
     {
         if (samplesPerEdge is < 1 or > 2048) throw new ArgumentOutOfRangeException(nameof(samplesPerEdge));
         CalibrationGroup group = Groups.FirstOrDefault(item => item.Id == groupId)
-            ?? throw new ArgumentException("标定组编号无效。");
+            ?? throw new ArgumentException("Invalid calibration group index.");
         return GroupBoundaries(group).Select(boundary => SampleBoundary(boundary, samplesPerEdge)).ToArray();
     }
 
@@ -318,7 +318,7 @@ public sealed class CalibrationTarget
     {
         if (maxPoints is < 16 or > 1_000_000) throw new ArgumentOutOfRangeException(nameof(maxPoints));
         CalibrationGroup group = Groups.FirstOrDefault(item => item.Id == groupId)
-            ?? throw new ArgumentException("标定组编号无效。");
+            ?? throw new ArgumentException("Invalid calibration group index.");
         var paths = new List<IReadOnlyList<CalibrationPoint>>();
         int remaining = maxPoints;
         foreach (SourceBoundary boundary in GroupBoundaries(group))
@@ -383,16 +383,16 @@ public sealed class CalibrationTarget
         double rotationRadians = 0)
     {
         ValidateCompatible(actualParameters);
-        if (!double.IsFinite(rotationRadians)) throw new ArgumentException("旋转必须是有限数值。");
+        if (!double.IsFinite(rotationRadians)) throw new ArgumentException("Rotation must be a finite number.");
         var actual = new CalibrationGeometry(actualParameters);
         return sourcePoint =>
         {
             ArgumentNullException.ThrowIfNull(sourcePoint);
             if (!double.IsFinite(sourcePoint.X) || !double.IsFinite(sourcePoint.Y))
-                throw new ArgumentException("角点坐标必须是有限数值。");
+                throw new ArgumentException("Corner coordinates must be finite numbers.");
             double radius = Math.Sqrt(sourcePoint.X * sourcePoint.X + sourcePoint.Y * sourcePoint.Y);
             if (radius < Parameters.InnerRadiusMm - 1e-8 || radius > Parameters.OuterRadiusMm + 1e-8)
-                throw new ArgumentException("源控制点不在生成时的绘图环带内。");
+                throw new ArgumentException("Source control point not within generated drawing zone.");
             double progress = _generatedGeometry.ProgressAtRadius(radius);
             (double actualRadius, double actualAngle) = actual.AtProgress(progress);
             double angle = Math.Atan2(sourcePoint.Y, sourcePoint.X)
@@ -411,7 +411,7 @@ public sealed class CalibrationTarget
     {
         if (maxPoints is < 16 or > 1_000_000) throw new ArgumentOutOfRangeException(nameof(maxPoints));
         if (string.IsNullOrWhiteSpace(cellId) || !_byId.TryGetValue(cellId, out CalibrationCell? cell))
-            throw new ArgumentException("控制块编号无效。");
+            throw new ArgumentException("Invalid control block index.");
         return MapBoundary(CellBoundary(cell), actual, rotationRadians, maxPoints);
     }
 
@@ -445,7 +445,7 @@ public sealed class CalibrationTarget
                 double lowRadius = Math.Min(firstRadius, lastRadius), highRadius = Math.Max(firstRadius, lastRadius);
                 if (!reverseModel.TryAtRadius(lowRadius, out CalibrationCrossSample lowSample)
                     || !reverseModel.TryAtRadius(highRadius, out CalibrationCrossSample highSample))
-                    throw new ArgumentException("轮廓在当前轨距参数下没有有效映射。");
+                    throw new ArgumentException("Contour has no valid mapping under current pitch parameters.");
                 double derivativeBound = reverseModel.DerivativeBound(lowSample, highSample);
                 double sourceAngle = Math.Atan2(last.Y, last.X) - Math.Atan2(first.Y, first.X);
                 sourceAngle = Math.Abs(Math.Atan2(Math.Sin(sourceAngle), Math.Cos(sourceAngle)));
@@ -470,14 +470,14 @@ public sealed class CalibrationTarget
     }
 
     private static InvalidOperationException OutlineLimit() => new(
-        "候选绕行过多，完整轮廓采样超出上限；请缩小搜索范围或提高采样上限后再确认形状。");
+        "Too many candidate turns, contour sampling exceeded limit; narrow search range or increase limit.");
 
     /// <summary>Map a point in the predicted actual disc back into the saved generated target.</summary>
     public Func<CalibrationPoint, CalibrationPoint?> CreateInverseMapping(CalibrationParameters actualParameters,
         double rotationRadians = 0)
     {
         ValidateCompatible(actualParameters);
-        if (!double.IsFinite(rotationRadians)) throw new ArgumentException("旋转必须是有限数值。");
+        if (!double.IsFinite(rotationRadians)) throw new ArgumentException("Rotation must be a finite number.");
         var actual = new CalibrationGeometry(actualParameters);
         return point =>
         {
@@ -501,7 +501,7 @@ public sealed class CalibrationTarget
             || actual.DrawingStartSector != Parameters.DrawingStartSector
             || actual.DrawingEndSectorExclusive != Parameters.DrawingEndSectorExclusive
             || actual.BluRayIsoTimestamp != Parameters.BluRayIsoTimestamp)
-            throw new ArgumentException("标定固定盘片类型、扇区数和线速度／位长；DVD 可拟合内外半径、三次轨距与整体旋转。");
+            throw new ArgumentException("Calibration fixes disc type, sector count, and velocity/bit length; DVD fits radii, cubic pitch, and rotation.");
     }
 
     private static CalibrationCell[] BuildCells(CalibrationParameters parameters)

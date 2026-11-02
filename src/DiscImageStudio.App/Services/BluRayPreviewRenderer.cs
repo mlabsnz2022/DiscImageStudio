@@ -101,7 +101,7 @@ public static class BluRayPreviewRenderer
         using FileStream source = new(Path.GetFullPath(isoPath), FileMode.Open, FileAccess.Read,
             FileShare.Read, bufferSize: 1, FileOptions.RandomAccess);
         if (source.Length != actual.ContentLength)
-            throw new ArgumentException($"BD ISO 长度与总扇区数不符：需要 {actual.ContentLength:N0} 字节，实际 {source.Length:N0} 字节。", nameof(isoPath));
+            throw new ArgumentException($"BD ISO length does not match total sectors: expected {actual.ContentLength:N0} bytes, actual {source.Length:N0} bytes.", nameof(isoPath));
 
         PixelProjection projection = new(actual, outputSize);
         byte[] pixels = new byte[checked(outputSize * outputSize * 4)];

@@ -13,10 +13,10 @@ public sealed class CalibrationPhotoTransform
     {
         ArgumentNullException.ThrowIfNull(discToSourceMatrix9);
         if (discToSourceMatrix9.Length != 9 || discToSourceMatrix9.Any(value => !double.IsFinite(value)))
-            throw new ArgumentException("照片变换必须包含 9 个有限数值。", nameof(discToSourceMatrix9));
+            throw new ArgumentException("Photo transform must contain 9 finite numbers.", nameof(discToSourceMatrix9));
         _discToSource = (double[])discToSourceMatrix9.Clone();
         double scale = _discToSource.Max(Math.Abs);
-        if (scale <= 0) throw new ArgumentException("照片变换不可逆。");
+        if (scale <= 0) throw new ArgumentException("Photo transform is not invertible.");
         for (int i = 0; i < 9; i++) _discToSource[i] /= scale;
         _sourceToDisc = Invert(_discToSource);
     }
@@ -39,13 +39,13 @@ public sealed class CalibrationPhotoTransform
     internal static CalibrationPoint Map(double[] matrix, CalibrationPoint point)
     {
         ArgumentNullException.ThrowIfNull(point);
-        if (!double.IsFinite(point.X) || !double.IsFinite(point.Y)) throw new ArgumentException("照片坐标必须为有限数值。");
+        if (!double.IsFinite(point.X) || !double.IsFinite(point.Y)) throw new ArgumentException("Photo coordinates must be finite numbers.");
         double divisor = matrix[6] * point.X + matrix[7] * point.Y + matrix[8];
         double scale = Math.Abs(matrix[6] * point.X) + Math.Abs(matrix[7] * point.Y) + Math.Abs(matrix[8]);
-        if (Math.Abs(divisor) <= Math.Max(1e-15, scale * 1e-12)) throw new ArgumentException("该位置接近照片投影地平线，无法矫正。");
+        if (Math.Abs(divisor) <= Math.Max(1e-15, scale * 1e-12)) throw new ArgumentException("Location is near projective horizon, cannot rectify.");
         double x = (matrix[0] * point.X + matrix[1] * point.Y + matrix[2]) / divisor;
         double y = (matrix[3] * point.X + matrix[4] * point.Y + matrix[5]) / divisor;
-        if (!double.IsFinite(x) || !double.IsFinite(y)) throw new ArgumentException("照片变换产生了无效坐标。");
+        if (!double.IsFinite(x) || !double.IsFinite(y)) throw new ArgumentException("Photo transform produced invalid coordinates.");
         return new(x, y);
     }
 
@@ -60,7 +60,7 @@ public sealed class CalibrationPhotoTransform
         double determinant = m[0] * result[0] + m[1] * result[3] + m[2] * result[6];
         double determinantScale = Math.Abs(m[0] * result[0]) + Math.Abs(m[1] * result[3]) + Math.Abs(m[2] * result[6]);
         if (!double.IsFinite(determinant) || Math.Abs(determinant) <= Math.Max(1e-20, determinantScale * 1e-12))
-            throw new ArgumentException("照片变换退化，无法恢复盘面坐标。");
+            throw new ArgumentException("Photo transform degenerated; cannot recover disc surface coordinates.");
         for (int i = 0; i < 9; i++) result[i] /= determinant;
         return result;
     }
@@ -85,34 +85,34 @@ public static class CalibrationPhotoRectifier
         double physicalHoleRadiusMm = 7.5, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (outerPixels is null || holePixels is null) return Failed("请分别输入实体外缘和实体内缘轮廓。");
+        if (outerPixels is null || holePixels is null) return Failed("Please input outer physical rim and inner physical rim contours.");
         outerPixels = outerPixels.ToArray();
         holePixels = holePixels.ToArray();
         if (!double.IsFinite(physicalOuterRadiusMm) || !double.IsFinite(physicalHoleRadiusMm)
             || physicalOuterRadiusMm is < 10 or > 100 || physicalHoleRadiusMm <= 0
             || physicalHoleRadiusMm >= physicalOuterRadiusMm * 0.5)
-            return Failed("盘片与内缘的实体尺寸无效。常规盘为直径 120 mm、孔径 15 mm。");
+            return Failed("Physical dimensions for disc and inner hole are invalid. Standard disc is 120 mm diameter, 15 mm hole.");
         if (outerPixels.Count is < 5 or > 256 || holePixels.Count is < 5 or > 256)
-            return Failed("外缘和内缘各需要至少 5 个分散的点，且每条轮廓不超过 256 个点。");
+            return Failed("Outer and inner rims each require at least 5 distributed points, up to 256 points per contour.");
         if (outerPixels.Concat(holePixels).Any(p => p is null || !double.IsFinite(p.X) || !double.IsFinite(p.Y)))
-            return Failed("轮廓中存在无效坐标。");
+            return Failed("Invalid coordinates in contour.");
         double centerX = (outerPixels.Max(p => p.X) + outerPixels.Min(p => p.X)) / 2;
         double centerY = (outerPixels.Max(p => p.Y) + outerPixels.Min(p => p.Y)) / 2;
         double sourceScale = Math.Max(outerPixels.Max(p => p.X) - outerPixels.Min(p => p.X),
             outerPixels.Max(p => p.Y) - outerPixels.Min(p => p.Y)) / 2;
-        if (!double.IsFinite(sourceScale) || sourceScale < 5) return Failed("照片中的盘片过小，无法稳定矫正。");
+        if (!double.IsFinite(sourceScale) || sourceScale < 5) return Failed("Disc in photo is too small for stable rectification.");
         CalibrationPoint[] outer = outerPixels.Select(p => new CalibrationPoint((p.X - centerX) / sourceScale,
             (p.Y - centerY) / sourceScale)).ToArray();
         CalibrationPoint[] hole = holePixels.Select(p => new CalibrationPoint((p.X - centerX) / sourceScale,
             (p.Y - centerY) / sourceScale)).ToArray();
         if (!IsSpread(outer) || !IsSpread(hole))
-            return Failed("轮廓点重复或接近一条直线，请沿外缘和内缘分别分散布点。");
+            return Failed("Contour points duplicate or nearly collinear; distribute points around outer and inner rims.");
         double[]? initial = InitialAffineEllipse(outer);
-        if (initial is null) return Failed("外缘轮廓无法形成稳定椭圆，请核对实体外缘上的点。");
+        if (initial is null) return Failed("Outer rim points cannot form a stable ellipse; verify points on outer physical rim.");
         double holeExtent = hole.Select(p => Math.Sqrt(Math.Pow(Math.Exp(initial[0]) * p.X + initial[1] * p.Y + initial[2], 2)
             + Math.Pow(Math.Exp(initial[3]) * p.Y + initial[4], 2))).Average();
         if (holeExtent is < 0.015 or > 0.9)
-            return Failed("内缘轮廓与外缘位置不符，请确认选中的是贯通的实体内缘，而非盘面的印刷圆环。");
+            return Failed("Inner rim does not match outer rim; ensure selected points are on physical inner hole, not printed graphics.");
 
         double ratio = physicalHoleRadiusMm / physicalOuterRadiusMm;
         Datum[] data = outer.Select(p => new Datum(p.X, p.Y, 1, 1.0 / Math.Sqrt(outer.Length)))
@@ -138,7 +138,7 @@ public static class CalibrationPhotoRectifier
             if (cost < bestCost) { best = solution; bestCost = cost; }
             if (bestCost < 1e-20) break;
         }
-        if (best is null || !double.IsFinite(bestCost)) return Failed("两条轮廓不能得到有效的联合投影，请检查布点。");
+        if (best is null || !double.IsFinite(bestCost)) return Failed("Both contours cannot produce a valid joint projection; check point placement.");
         try
         {
             double a = Math.Exp(best[0]), b = best[1], c = best[2], d = Math.Exp(best[3]), e = best[4];
@@ -150,17 +150,17 @@ public static class CalibrationPhotoRectifier
                 g / sourceScale, h / sourceScale, 1 - (g * centerX + h * centerY) / sourceScale,
             ];
             var transform = new CalibrationPhotoTransform(CalibrationPhotoTransform.Invert(sourceToDisc));
-            if (!transform.IsValidForDisc(radius)) return Failed("拍摄角度或轮廓对应关系导致投影退化，请换角度拍摄或重新布点。");
+            if (!transform.IsValidForDisc(radius)) return Failed("Camera angle or contour correspondence caused degenerate projection; retake photo or reposition points.");
             if (!CoversCircle(outerPixels, transform) || !CoversCircle(holePixels, transform))
-                return Failed("轮廓点集中在局部，请在两条完整圆周的不同方向补点。");
+                return Failed("Contour points are clustered; add points across different directions of both circumferences.");
             (double outerRms, double outerMaximum) = Residual(outerPixels, transform, radius, cancellationToken);
             (double holeRms, double holeMaximum) = Residual(holePixels, transform, physicalHoleRadiusMm, cancellationToken);
             double tolerance = Math.Max(2, sourceScale * 0.006);
             if (outerRms > tolerance || holeRms > tolerance || Math.Max(outerMaximum, holeMaximum) > tolerance * 3)
                 return new(false, null, outerRms, holeRms,
-                    $"两条实体轮廓无法同时吻合：外缘误差 {outerRms:0.##} px，内缘误差 {holeRms:0.##} px。请检查内缘、外缘与盘片尺寸。");
+                    $"Cannot jointly fit both rims: outer error {outerRms:0.##} px, inner error {holeRms:0.##} px. Check points and disc size.");
             return new(true, transform, outerRms, holeRms,
-                $"已联合校正外缘与内缘。轮廓误差：外缘 {outerRms:0.##} px，内缘 {holeRms:0.##} px。请继续核对两条轮廓。");
+                $"Jointly rectified outer and inner rims. Contour error: outer {outerRms:0.##} px, inner {holeRms:0.##} px.");
         }
         catch (ArgumentException error) { return Failed(error.Message); }
     }

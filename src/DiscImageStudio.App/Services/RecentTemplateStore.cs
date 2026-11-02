@@ -68,7 +68,7 @@ public sealed class RecentTemplateStore
         Save(entries);
     }
 
-    /// <summary>Drops one id so a deleted preset stops occupying a slot in the 最近 tab.</summary>
+    /// <summary>Drops one id so a deleted preset stops occupying a slot in the Recent tab.</summary>
     public void Remove(string presetId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(presetId);

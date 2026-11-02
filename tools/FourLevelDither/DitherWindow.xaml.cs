@@ -40,7 +40,7 @@ public partial class DitherWindow : Window
             if (!_saving) return;
             e.Cancel = true;
             _closeAfterSave = true;
-            StatusText.Text = "正在完成 PNG 保存，保存后将关闭…";
+            StatusText.Text = "Completing PNG save, will close after saving…";
         };
         Closed += (_, _) => { _closed = true; _cancellation?.Cancel(); };
     }
@@ -71,7 +71,7 @@ public partial class DitherWindow : Window
         FileText.ToolTip = null;
         SourceInfo.Text = string.Empty;
         StatusText.ToolTip = null;
-        StatusText.Text = $"正在处理 {DitherModes.Label(mode)}抖动（{DitherModes.PaletteLabel(mode)}）· {GammaStatus(linearizeSrgb)}…";
+        StatusText.Text = $"Processing {DitherModes.Label(mode)} dither ({DitherModes.PaletteLabel(mode)}) · {GammaStatus(linearizeSrgb)}…";
         BusyBar.Visibility = Visibility.Visible;
         Stopwatch stopwatch = Stopwatch.StartNew();
         try
@@ -91,17 +91,17 @@ public partial class DitherWindow : Window
             ResultImage.Source = result;
             SourcePlaceholder.Visibility = Visibility.Collapsed;
             ResultPlaceholder.Visibility = Visibility.Collapsed;
-            SourceInfo.Text = $"{source.PixelWidth:N0} × {source.PixelHeight:N0} 像素";
+            SourceInfo.Text = $"{source.PixelWidth:N0} × {source.PixelHeight:N0} px";
             FileText.Text = fullPath;
             FileText.ToolTip = fullPath;
             SaveButton.IsEnabled = true;
-            StatusText.Text = $"{DitherModes.Label(mode)}处理完成 · {GammaStatus(linearizeSrgb)} · {source.PixelWidth:N0} × {source.PixelHeight:N0} · {stopwatch.Elapsed.TotalSeconds:F2} 秒";
+            StatusText.Text = $"{DitherModes.Label(mode)} processing complete · {GammaStatus(linearizeSrgb)} · {source.PixelWidth:N0} × {source.PixelHeight:N0} · {stopwatch.Elapsed.TotalSeconds:F2} s";
             UpdatePreviewSizes();
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
         catch (Exception exception)
         {
-            if (!_closed && revision == _revision) StatusText.Text = $"处理失败：{exception.Message}";
+            if (!_closed && revision == _revision) StatusText.Text = $"Processing failed: {exception.Message}";
         }
         finally
         {
@@ -123,11 +123,11 @@ public partial class DitherWindow : Window
 
     private void UpdateModeDisplay()
     {
-        ResultHeading.Text = DitherModes.Label(_mode) + "抖动结果";
-        SaveButton.Content = "保存黑白 PNG";
+        ResultHeading.Text = DitherModes.Label(_mode) + " Dither Result";
+        SaveButton.Content = "Save B&W PNG";
         ModeHint.Text = _mode == DitherMode.Dvd
-            ? "A5 → 黑色 0 · 92 → 白色 255"
-            : "0D → 黑色 0 · AA → 白色 255";
+            ? "A5 → Black 0 · 92 → White 255"
+            : "0D → Black 0 · AA → White 255";
     }
 
     private async void Gamma_Changed(object sender, RoutedEventArgs e)
@@ -141,20 +141,20 @@ public partial class DitherWindow : Window
     private void UpdateGammaDisplay()
     {
         GammaHint.Text = _linearizeSrgb
-            ? "已开启：按线性亮度分配黑白像素，中间调通常更深"
-            : "已关闭：保持现有明暗分配";
-        ResultDetails.Text = $"蛇形 Floyd–Steinberg · {GammaStatus(_linearizeSrgb)} · 无损 PNG";
-        if (_requestedPath is null) StatusText.Text = "就绪 · " + GammaStatus(_linearizeSrgb);
+            ? "Enabled: Allocate black/white pixels by linear luminance (midtones usually darker)"
+            : "Disabled: Preserves existing shading distribution";
+        ResultDetails.Text = $"Serpentine Floyd–Steinberg · {GammaStatus(_linearizeSrgb)} · Lossless PNG";
+        if (_requestedPath is null) StatusText.Text = "Ready · " + GammaStatus(_linearizeSrgb);
     }
 
-    private static string GammaStatus(bool linearizeSrgb) => linearizeSrgb ? "sRGB 伽马：开" : "sRGB 伽马：关";
+    private static string GammaStatus(bool linearizeSrgb) => linearizeSrgb ? "sRGB Gamma: On" : "sRGB Gamma: Off";
 
     private async void Open_Click(object sender, RoutedEventArgs e)
     {
         OpenFileDialog dialog = new()
         {
-            Title = "选择原图",
-            Filter = "图片|*.png;*.jpg;*.jpeg;*.bmp;*.tif;*.tiff;*.gif|所有文件|*.*",
+            Title = "Select Image",
+            Filter = "Images|*.png;*.jpg;*.jpeg;*.bmp;*.tif;*.tiff;*.gif|All Files|*.*",
             CheckFileExists = true,
         };
         if (dialog.ShowDialog(this) == true) await LoadImageAsync(dialog.FileName);
@@ -165,8 +165,8 @@ public partial class DitherWindow : Window
         if (_result is null || _inputPath is null || _saving) return;
         SaveFileDialog dialog = new()
         {
-            Title = "保存" + DitherModes.Suffix(_mode) + " PNG",
-            Filter = "PNG 图片|*.png",
+            Title = "Save " + DitherModes.Suffix(_mode) + " PNG",
+            Filter = "PNG Image|*.png",
             DefaultExt = ".png", AddExtension = true, OverwritePrompt = true,
             FileName = Path.GetFileNameWithoutExtension(_inputPath) + "-" + DitherModes.Suffix(_mode)
                 + (_linearizeSrgb ? "-sRGB" : string.Empty) + ".png",
@@ -185,15 +185,15 @@ public partial class DitherWindow : Window
             ModePicker.IsEnabled = false;
             GammaToggle.IsEnabled = false;
             BusyBar.Visibility = Visibility.Visible;
-            StatusText.Text = "正在保存 PNG · " + GammaStatus(linearizeSrgb) + "…";
+            StatusText.Text = "Saving PNG · " + GammaStatus(linearizeSrgb) + "…";
             await Task.Run(() => DitherProcessor.SavePng(result, dialog.FileName, DitherModes.Levels(mode)));
-            StatusText.Text = $"已保存 · {GammaStatus(linearizeSrgb)}：{dialog.FileName}";
+            StatusText.Text = $"Saved · {GammaStatus(linearizeSrgb)}: {dialog.FileName}";
             StatusText.ToolTip = dialog.FileName;
         }
         catch (Exception exception)
         {
             _closeAfterSave = false;
-            StatusText.Text = $"保存失败：{exception.Message}";
+            StatusText.Text = $"Save failed: {exception.Message}";
         }
         finally
         {

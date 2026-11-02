@@ -234,11 +234,11 @@ public partial class MainWindow : Window
             : kind == DiscImageStudio.Burning.OpticalBurnMediaKind.BluRayData ? 12219392L * 2048 : 2295104L * 2048;
         _shell.SetBusy(true);
         _shell.BeginBurnDockJob(kind, total);
-        _shell.ReportBurnProgress(new("buffer", "正在准备防断流缓冲区…", 0, total));
+        _shell.ReportBurnProgress(new("buffer", "Preparing underrun-protection buffer…", 0, total));
         if (phase != "buffer")
-            _shell.ReportBurnProgress(new("write", "刻录机开始写入。", total / 3, total, 8.25 * 1024 * 1024));
+            _shell.ReportBurnProgress(new("write", "Recorder started writing.", total / 3, total, 8.25 * 1024 * 1024));
         if (phase == "finalize")
-            _shell.ReportBurnProgress(new("finalize", "正在刷新缓存并关闭刻录会话…", total / 3, total));
+            _shell.ReportBurnProgress(new("finalize", "Flushing cache and closing write session…", total / 3, total));
     }
 
     /// <summary>Snapshot hook: forces the hovered state on the first recent-project card
@@ -504,7 +504,7 @@ public partial class MainWindow : Window
         if (!_shell.IsProjectOpen || SidebarBorder.Visibility != Visibility.Visible
             || ProjectHeaderButton.Visibility != Visibility.Visible)
         {
-            _shell.ShowToast("标定参数已应用", "本工程的参数已更新。", ToastKind.Success);
+            _shell.ShowToast("Calibration Parameters Applied", "Project parameters have been updated.", ToastKind.Success);
             return;
         }
 
@@ -629,7 +629,7 @@ public partial class MainWindow : Window
         if (settings.CacheDirectory.Length > 0
             && !string.Equals(cacheDirectory, settings.CacheDirectory, StringComparison.OrdinalIgnoreCase))
         {
-            _shell.ShowToast("缓存位置不可用", "已改用系统临时目录。", ToastKind.Warning);
+            _shell.ShowToast("Cache Location Unavailable", "Reverted to system temporary directory.", ToastKind.Warning);
         }
     }
 
@@ -890,6 +890,6 @@ public partial class MainWindow : Window
         BackHomeButton.HorizontalAlignment = collapsed ? HorizontalAlignment.Center : HorizontalAlignment.Left;
         CollapseLeftIcon.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
         CollapseRightIcon.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
-        SidebarCollapseToggle.ToolTip = collapsed ? "展开侧边栏" : "收起侧边栏";
+        SidebarCollapseToggle.ToolTip = collapsed ? "Expand Sidebar" : "Collapse Sidebar";
     }
 }

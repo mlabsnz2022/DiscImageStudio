@@ -11,7 +11,7 @@ public partial class InterleaveToggle : UserControl
 {
     public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
         nameof(Label), typeof(string), typeof(InterleaveToggle),
-        new PropertyMetadata("启用 CD-DA 延迟交织"));
+        new PropertyMetadata("Enable CD-DA Delay Interleaving"));
 
     public static readonly DependencyProperty IsCheckedProperty = DependencyProperty.Register(
         nameof(IsChecked), typeof(bool), typeof(InterleaveToggle),
@@ -20,7 +20,7 @@ public partial class InterleaveToggle : UserControl
     public static readonly DependencyProperty HintProperty = DependencyProperty.Register(
         nameof(Hint), typeof(string), typeof(InterleaveToggle),
         new PropertyMetadata(
-            "如您在盘片制作时勾选了“启用 CD-DA 延迟交织”，则应勾选该选项。",
+            "Check this option if \"Enable CD-DA Delay Interleaving\" was enabled when creating the disc.",
             static (sender, _) => ((InterleaveToggle)sender).UpdateHint()));
 
     public InterleaveToggle()

@@ -5,13 +5,13 @@ namespace DiscImageStudio.Controls;
 
 public enum StepCardState
 {
-    /// <summary>Not reachable yet; the body is collapsed and the chip reads 待开始.</summary>
+    /// <summary>Not reachable yet; the body is collapsed and the chip reads Pending.</summary>
     Pending,
 
-    /// <summary>The step the user is on; chip reads 进行中 with the primary color.</summary>
+    /// <summary>The step the user is on; chip reads In Progress with the primary color.</summary>
     Active,
 
-    /// <summary>Finished; chip reads 已完成 with the success color and the dot becomes a check.</summary>
+    /// <summary>Finished; chip reads Completed with the success color and the dot becomes a check.</summary>
     Done,
 }
 
